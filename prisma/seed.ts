@@ -49,24 +49,28 @@ async function main() {
     create: { tasaUsdGlobal: 600 },
   });
 
-  await prisma.persona.createMany({
-    data: [
-      { nombre: "Juan Perez", alias: "juanpe", tipo: "REMESERO" },
-      { nombre: "Maria Lopez", alias: "marilo", tipo: "REMESERO" },
-      { nombre: "Carlos Ruiz", alias: "carlosr", tipo: "COMPRADOR" },
-    ],
-    skipDuplicates: true,
-  });
+  const personaCount = await prisma.persona.count();
+  if (personaCount === 0) {
+    await prisma.persona.createMany({
+      data: [
+        { nombre: "Juan Perez", alias: "juanpe", tipo: "REMESERO" },
+        { nombre: "Maria Lopez", alias: "marilo", tipo: "REMESERO" },
+        { nombre: "Carlos Ruiz", alias: "carlosr", tipo: "COMPRADOR" },
+      ],
+    });
+  }
 
-  await prisma.cuentaBancaria.createMany({
-    data: [
-      { nombre: "Wells Fargo Zelle", moneda: "USD", tipo: "ZELLE" },
-      { nombre: "Bank of America", moneda: "USD", tipo: "BANCO" },
-      { nombre: "Efectivo CUP", moneda: "CUP", tipo: "EFECTIVO" },
-      { nombre: "Efectivo USD", moneda: "USD", tipo: "EFECTIVO" },
-    ],
-    skipDuplicates: true,
-  });
+  const cuentaCount = await prisma.cuentaBancaria.count();
+  if (cuentaCount === 0) {
+    await prisma.cuentaBancaria.createMany({
+      data: [
+        { nombre: "Wells Fargo Zelle", moneda: "USD", tipo: "ZELLE" },
+        { nombre: "Bank of America", moneda: "USD", tipo: "BANCO" },
+        { nombre: "Efectivo CUP", moneda: "CUP", tipo: "EFECTIVO" },
+        { nombre: "Efectivo USD", moneda: "USD", tipo: "EFECTIVO" },
+      ],
+    });
+  }
 }
 
 main()
