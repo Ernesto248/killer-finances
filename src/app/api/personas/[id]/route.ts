@@ -57,12 +57,15 @@ export async function PUT(
 
     return NextResponse.json(persona);
   } catch (error: unknown) {
-    const err = error as Error & { errors?: unknown; name?: string };
+    const err = error as Error & { errors?: unknown; name?: string; code?: string };
     if (err.message === "No autenticado") {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
     if (err.message === "No autorizado") {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+    if (err.code === "P2025") {
+      return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
     if (err.name === "ZodError") {
       return NextResponse.json(
@@ -75,7 +78,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -83,12 +86,15 @@ export async function DELETE(
     await prisma.persona.delete({ where: { id: params.id } });
     return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {
-    const err = error as Error;
+    const err = error as Error & { code?: string };
     if (err.message === "No autenticado") {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
     if (err.message === "No autorizado") {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+    }
+    if (err.code === "P2025") {
+      return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
