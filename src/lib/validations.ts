@@ -20,3 +20,23 @@ export const cuentaBancariaSchema = z.object({
 });
 
 export type CuentaBancariaFormData = z.infer<typeof cuentaBancariaSchema>;
+
+export const cuadreSchema = z.object({
+  personaId: z.string().min(1, "La persona es requerida"),
+  nota: z.string().optional().nullable(),
+  deudaInicialCup: z.number().default(0),
+  pagadoCup: z.number().default(0),
+  deudaFinalCup: z.number().default(0),
+  totalZelleUsd: z.number().default(0),
+  tasaPromedioCup: z.number().default(0),
+  lineas: z.array(z.object({
+    montoUsd: z.number().min(0),
+    tasa: z.number().min(0),
+    modalidad: z.enum(["TASA", "COMISION"]).default("TASA"),
+    porcentajeComision: z.number().optional().nullable(),
+    montoCupResultante: z.number().default(0),
+    gananciaUsd: z.number().default(0),
+  })),
+});
+
+export type CuadreFormData = z.infer<typeof cuadreSchema>;
