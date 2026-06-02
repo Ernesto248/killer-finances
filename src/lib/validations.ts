@@ -40,3 +40,12 @@ export const cuadreSchema = z.object({
 });
 
 export type CuadreFormData = z.infer<typeof cuadreSchema>;
+
+export const pagoSchema = z.object({
+  personaId: z.string().min(1, "La persona es requerida"),
+  monto: z.number().positive("El monto debe ser positivo"),
+  moneda: z.enum(["USD", "CUP"]),
+  descripcion: z.string().optional().nullable(),
+});
+
+export type PagoFormData = z.infer<typeof pagoSchema>;
