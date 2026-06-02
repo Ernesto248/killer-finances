@@ -79,3 +79,35 @@ export const reventaWireSchema = z.object({
 );
 
 export type ReventaWireFormData = z.infer<typeof reventaWireSchema>;
+
+export const loteSchema = z.object({
+  nombre: z.string().min(1, "El nombre es requerido"),
+  costoTotal: z.number().min(0).default(0),
+  monedaCosto: z.enum(["USD", "CUP"]).default("USD"),
+  productos: z.array(z.object({
+    nombre: z.string().min(1, "Nombre del producto requerido"),
+    cantidadTotal: z.number().min(0).default(0),
+    costoUnitario: z.number().min(0).default(0),
+  })).optional().default([]),
+});
+
+export type LoteFormData = z.infer<typeof loteSchema>;
+
+export const loteVentaSchema = z.object({
+  cantidad: z.number().positive("La cantidad debe ser positiva"),
+  precioUnitario: z.number().min(0, "El precio debe ser 0 o mayor"),
+  moneda: z.enum(["USD", "CUP"]).default("CUP"),
+  personaId: z.string().optional().nullable(),
+});
+
+export type LoteVentaFormData = z.infer<typeof loteVentaSchema>;
+
+export const gastoSchema = z.object({
+  monto: z.number().positive("El monto debe ser positivo"),
+  moneda: z.enum(["USD", "CUP"]).default("CUP"),
+  categoria: z.enum(["SERVICIOS", "SALARIOS", "LOGISTICA", "IMPREVISTOS", "OTROS"]).default("OTROS"),
+  descripcion: z.string().optional().nullable(),
+  loteId: z.string().optional().nullable(),
+});
+
+export type GastoFormData = z.infer<typeof gastoSchema>;
