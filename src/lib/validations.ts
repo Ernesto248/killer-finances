@@ -49,3 +49,33 @@ export const pagoSchema = z.object({
 });
 
 export type PagoFormData = z.infer<typeof pagoSchema>;
+
+export const wireSchema = z.object({
+  compradorId: z.string().min(1, "El comprador es requerido"),
+  montoUsd: z.number().positive("El monto debe ser positivo"),
+  tasaPactada: z.number().positive("La tasa es requerida"),
+  monedaPago: z.enum(["CUP", "USD"]).default("CUP"),
+  porcentajeComision: z.number().optional().nullable(),
+});
+
+export type WireFormData = z.infer<typeof wireSchema>;
+
+export const abonoWireSchema = z.object({
+  monto: z.number().positive("El monto debe ser positivo"),
+  moneda: z.enum(["CUP", "USD"]).default("CUP"),
+});
+
+export type AbonoWireFormData = z.infer<typeof abonoWireSchema>;
+
+export const reventaWireSchema = z.object({
+  compradorId: z.string().min(1, "El comprador es requerido"),
+  vendedorId: z.string().min(1, "El vendedor es requerido"),
+  montoUsd: z.number().positive("El monto debe ser positivo"),
+  tasaCompra: z.number().positive("Tasa de compra requerida"),
+  tasaVenta: z.number().positive("Tasa de venta requerida"),
+}).refine(
+  (data) => data.compradorId !== data.vendedorId,
+  { message: "El comprador y vendedor no pueden ser la misma persona", path: ["vendedorId"] }
+);
+
+export type ReventaWireFormData = z.infer<typeof reventaWireSchema>;
