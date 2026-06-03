@@ -127,7 +127,12 @@ export function WireModal({
   }, [open, wire, reset, fetchPersonas, fetchTasaPromedio]);
 
   const onFormSubmit = (data: WireFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      montoUsd: Number(data.montoUsd) || 0,
+      tasaPactada: Number(data.tasaPactada) || 0,
+      porcentajeComision: data.porcentajeComision != null ? Number(data.porcentajeComision) || null : null,
+    });
     onOpenChange(false);
   };
 
@@ -189,10 +194,10 @@ export function WireModal({
               <Label htmlFor="montoUsd">Monto USD</Label>
               <Input
                 id="montoUsd"
-                type="number"
-                step="0.01"
-                min="0.01"
-                {...register("montoUsd", { valueAsNumber: true })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
+                {...register("montoUsd")}
               />
               {errors.montoUsd && (
                 <p className="text-sm text-destructive">
@@ -204,10 +209,10 @@ export function WireModal({
               <Label htmlFor="tasaPactada">Tasa Pactada</Label>
               <Input
                 id="tasaPactada"
-                type="number"
-                step="0.01"
-                min="0.01"
-                {...register("tasaPactada", { valueAsNumber: true })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
+                {...register("tasaPactada")}
               />
               {errors.tasaPactada && (
                 <p className="text-sm text-destructive">
@@ -251,9 +256,10 @@ export function WireModal({
             <Label htmlFor="porcentajeComision">% Comision (opcional)</Label>
             <Input
               id="porcentajeComision"
-              type="number"
-              step="0.01"
-              {...register("porcentajeComision", { valueAsNumber: true })}
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
+              {...register("porcentajeComision")}
               placeholder="Porcentaje de comision"
             />
           </div>

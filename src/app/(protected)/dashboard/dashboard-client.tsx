@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { PeriodFilter, type Period } from "@/components/shared/period-filter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, Clock, TrendingUp, Wallet, Globe } from "lucide-react";
@@ -8,6 +8,10 @@ import { TasaEltoqueCard } from "@/components/dashboard/tasa-eltoque-card";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 
 interface DashboardData {
+  balanceBancosUsd: number;
+  balanceEfectivoUsd: number;
+  balanceBancosCup: number;
+  balanceEfectivoCup: number;
   balanceUsd: number;
   balanceCup: number;
   gananciaCup: number;
@@ -22,6 +26,8 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
   const [period, setPeriod] = useState<Period>("month");
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
+  const [editingTasa, setEditingTasa] = useState(false);
+  const [tasaValue, setTasaValue] = useState(String(initialData.tasaGlobal));
 
   const handlePeriodChange = async (p: Period, from?: Date, to?: Date) => {
     setPeriod(p);
@@ -34,12 +40,23 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
       const res = await fetch(`/api/dashboard/kpis?${params}`);
       const newData = await res.json();
       setData(newData);
+      setTasaValue(String(newData.tasaGlobal));
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleSaveTasa = useCallback(async () => {
+    await fetch("/api/configuracion", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tasaUsdGlobal: Number(tasaValue) }),
+    });
+    setEditingTasa(false);
+    setData((prev) => ({ ...prev, tasaGlobal: Number(tasaValue) }));
+  }, [tasaValue]);
 
   const gananciaCupTrend = data.gananciaCup > 0 ? "+" : data.gananciaCup < 0 ? "-" : null;
 
@@ -51,13 +68,15 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
       </div>
 
       <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
-        <KpiCard title="Balance USD" value={formatCurrency(data.balanceUsd, "USD")} icon={Wallet} loading={loading} />
-        <KpiCard title="Balance CUP" value={formatCurrency(data.balanceCup, "CUP")} icon={Wallet} loading={loading} />
-        <KpiCard title="Ganancia CUP" value={formatCurrency(data.gananciaCup, "CUP")} icon={TrendingUp} loading={loading} trend={gananciaCupTrend} />
-        <KpiCard title="Wires Pend." value={`${data.wiresPendientesCount}`} subtitle={`${formatCurrency(data.wiresPendientesUsd, "USD")} x cobrar`} icon={Clock} loading={loading} />
+        <KpiCard title="USD Bancos/Zelle" value={formatCurrency(data.balanceBancosUsd, "USD")} icon={Wallet} loading={loading} />
+        <KpiCard title="USD Efectivo" value={formatCurrency(data.balanceEfectivoUsd, "USD")} icon={Wallet} loading={loading} />
+        <KpiCard title="CUP Bancos/Zelle" value={formatCurrency(data.balanceBancosCup, "CUP")} icon={Wallet} loading={loading} />
+        <KpiCard title="CUP Efectivo" value={formatCurrency(data.balanceEfectivoCup, "CUP")} icon={Wallet} loading={loading} />
       </div>
 
-      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2">
+      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
+        <KpiCard title="Ganancia CUP" value={formatCurrency(data.gananciaCup, "CUP")} icon={TrendingUp} loading={loading} trend={gananciaCupTrend} />
+        <KpiCard title="Wires Pend." value={`${data.wiresPendientesCount}`} subtitle={`${formatCurrency(data.wiresPendientesUsd, "USD")} x cobrar`} icon={Clock} loading={loading} />
         <KpiCard title="Remeseros Activos" value={`${data.remeserosActivos} / ${data.totalRemeseros}`} icon={Users} loading={loading} />
         <div className="rounded-xl ring-1 ring-border bg-white p-3 md:p-5">
           <div className="flex items-start justify-between">
@@ -65,8 +84,25 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
             <Globe className="size-4 md:size-5 text-[#9ca3af]" />
           </div>
           <div className="mt-2">
-            {loading ? <Skeleton className="h-6 md:h-8 w-16 md:w-20" /> : (
-              <span className="text-xl md:text-2xl font-bold text-[#1a1a1a]">{formatNumber(data.tasaGlobal)}</span>
+            {loading ? (
+              <Skeleton className="h-6 md:h-8 w-16 md:w-20" />
+            ) : editingTasa ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={tasaValue}
+                  onChange={(e) => setTasaValue(e.target.value)}
+                  className="w-24 h-8 rounded-lg border px-2 text-sm"
+                />
+                <button onClick={handleSaveTasa} className="text-sm text-[#2563eb] font-medium">Guardar</button>
+                <button onClick={() => { setEditingTasa(false); setTasaValue(String(data.tasaGlobal)); }} className="text-sm text-[#6b7280]">Cancelar</button>
+              </div>
+            ) : (
+              <div onClick={() => setEditingTasa(true)} className="cursor-pointer">
+                <span className="text-xl md:text-2xl font-bold text-[#1a1a1a]">{formatNumber(data.tasaGlobal)}</span>
+                <span className="text-xs text-[#6b7280] ml-2">Editar</span>
+              </div>
             )}
           </div>
         </div>

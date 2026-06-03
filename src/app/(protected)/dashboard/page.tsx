@@ -12,8 +12,10 @@ export default async function DashboardPage() {
   const dateFilter = { gte: startOfMonth, lte: now };
 
   const [
-    cuentasUsd,
-    cuentasCup,
+    balanceBancosUsd,
+    balanceEfectivoUsd,
+    balanceBancosCup,
+    balanceEfectivoCup,
     gananciaCupWires,
     gananciaCupReventas,
     remeserosActivos,
@@ -21,8 +23,10 @@ export default async function DashboardPage() {
     wiresPendientes,
     config,
   ] = await Promise.all([
-    prisma.cuentaBancaria.aggregate({ where: { moneda: "USD" }, _sum: { saldoActual: true } }),
-    prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP" }, _sum: { saldoActual: true } }),
+    prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: { in: ["ZELLE", "BANCO"] } }, _sum: { saldoActual: true } }),
+    prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: "EFECTIVO" }, _sum: { saldoActual: true } }),
+    prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP", tipo: { in: ["ZELLE", "BANCO"] } }, _sum: { saldoActual: true } }),
+    prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP", tipo: "EFECTIVO" }, _sum: { saldoActual: true } }),
     prisma.wire.aggregate({ where: { fecha: dateFilter }, _sum: { gananciaCup: true } }),
     prisma.reventaWire.aggregate({ where: { fecha: dateFilter }, _sum: { gananciaCup: true } }),
     prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }),
@@ -34,8 +38,12 @@ export default async function DashboardPage() {
   return (
     <DashboardClient
       initialData={{
-        balanceUsd: Number(cuentasUsd._sum.saldoActual ?? 0),
-        balanceCup: Number(cuentasCup._sum.saldoActual ?? 0),
+        balanceBancosUsd: Number(balanceBancosUsd._sum.saldoActual ?? 0),
+        balanceEfectivoUsd: Number(balanceEfectivoUsd._sum.saldoActual ?? 0),
+        balanceBancosCup: Number(balanceBancosCup._sum.saldoActual ?? 0),
+        balanceEfectivoCup: Number(balanceEfectivoCup._sum.saldoActual ?? 0),
+        balanceUsd: Number(balanceBancosUsd._sum.saldoActual ?? 0) + Number(balanceEfectivoUsd._sum.saldoActual ?? 0),
+        balanceCup: Number(balanceBancosCup._sum.saldoActual ?? 0) + Number(balanceEfectivoCup._sum.saldoActual ?? 0),
         gananciaCup: Number(gananciaCupWires._sum.gananciaCup ?? 0) + Number(gananciaCupReventas._sum.gananciaCup ?? 0),
         remeserosActivos,
         totalRemeseros,

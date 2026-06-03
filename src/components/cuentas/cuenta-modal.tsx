@@ -83,7 +83,10 @@ export function CuentaModal({
   }, [open, cuenta, reset]);
 
   const onFormSubmit = (data: CuentaBancariaFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      saldoActual: Number(data.saldoActual) || 0,
+    });
     onOpenChange(false);
   };
 
@@ -174,10 +177,10 @@ export function CuentaModal({
             <Label htmlFor="saldoActual">Saldo Actual</Label>
             <Input
               id="saldoActual"
-              type="number"
-              step="0.01"
-              min="0"
-              {...register("saldoActual", { valueAsNumber: true })}
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
+              {...register("saldoActual")}
               placeholder="0.00"
             />
             {errors.saldoActual && (

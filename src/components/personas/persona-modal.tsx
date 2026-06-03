@@ -83,7 +83,11 @@ export function PersonaModal({
   }, [open, persona, reset]);
 
   const onFormSubmit = (data: PersonaFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      balanceUsd: Number(data.balanceUsd) || 0,
+      balanceCup: Number(data.balanceCup) || 0,
+    });
     onOpenChange(false);
   };
 
@@ -163,19 +167,27 @@ export function PersonaModal({
               <Label htmlFor="balanceUsd">Balance USD</Label>
               <Input
                 id="balanceUsd"
-                type="number"
-                step="0.01"
-                {...register("balanceUsd", { valueAsNumber: true })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
+                {...register("balanceUsd")}
               />
+              {errors.balanceUsd && (
+                <p className="text-sm text-destructive">{errors.balanceUsd.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="balanceCup">Balance CUP</Label>
               <Input
                 id="balanceCup"
-                type="number"
-                step="0.01"
-                {...register("balanceCup", { valueAsNumber: true })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
+                {...register("balanceCup")}
               />
+              {errors.balanceCup && (
+                <p className="text-sm text-destructive">{errors.balanceCup.message}</p>
+              )}
             </div>
           </div>
 

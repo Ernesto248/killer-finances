@@ -74,7 +74,15 @@ export function LoteModal({
   }, [open, defaultValues, reset]);
 
   const onFormSubmit = (data: LoteFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      costoTotal: Number(data.costoTotal) || 0,
+      productos: data.productos.map((p) => ({
+        ...p,
+        cantidadTotal: Number(p.cantidadTotal) || 0,
+        costoUnitario: Number(p.costoUnitario) || 0,
+      })),
+    });
     onOpenChange(false);
   };
 
@@ -108,10 +116,10 @@ export function LoteModal({
               <Label htmlFor="costoTotal">Costo Total</Label>
               <Input
                 id="costoTotal"
-                type="number"
-                step="0.01"
-                min="0"
-                {...register("costoTotal", { valueAsNumber: true })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
+                {...register("costoTotal")}
               />
               {errors.costoTotal && (
                 <p className="text-sm text-destructive">
@@ -207,24 +215,30 @@ export function LoteModal({
                   <div className="space-y-2">
                     <Label>Cantidad total</Label>
                     <Input
-                      type="number"
-                      step="1"
-                      min="0"
-                      {...register(`productos.${index}.cantidadTotal`, {
-                        valueAsNumber: true,
-                      })}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      {...register(`productos.${index}.cantidadTotal`)}
                     />
+                    {errors.productos?.[index]?.cantidadTotal && (
+                      <p className="text-sm text-destructive">
+                        {errors.productos[index]?.cantidadTotal?.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Costo unitario</Label>
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      {...register(`productos.${index}.costoUnitario`, {
-                        valueAsNumber: true,
-                      })}
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.]?[0-9]*"
+                      {...register(`productos.${index}.costoUnitario`)}
                     />
+                    {errors.productos?.[index]?.costoUnitario && (
+                      <p className="text-sm text-destructive">
+                        {errors.productos[index]?.costoUnitario?.message}
+                      </p>
+                    )}
                   </div>
                 </div>
               </motion.div>

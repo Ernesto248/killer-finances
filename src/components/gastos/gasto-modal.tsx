@@ -89,7 +89,10 @@ export function GastoModal({
   }, [open, gasto, reset]);
 
   const onFormSubmit = (data: GastoFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      monto: Number(data.monto) || 0,
+    });
     onOpenChange(false);
   };
 
@@ -110,10 +113,10 @@ export function GastoModal({
             <Label htmlFor="monto">Monto</Label>
             <Input
               id="monto"
-              type="number"
-              step="0.01"
-              min="0.01"
-              {...register("monto", { valueAsNumber: true })}
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
+              {...register("monto")}
               placeholder="0.00"
             />
             {errors.monto && (

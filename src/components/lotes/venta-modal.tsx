@@ -89,7 +89,11 @@ export function VentaModal({
       const res = await fetch(`/api/lotes/${loteId}/ventas`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          cantidad: Number(data.cantidad) || 0,
+          precioUnitario: Number(data.precioUnitario) || 0,
+        }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -121,10 +125,10 @@ export function VentaModal({
             <Label htmlFor="cantidad">Cantidad</Label>
             <Input
               id="cantidad"
-              type="number"
-              step="1"
-              min="1"
-              {...register("cantidad", { valueAsNumber: true })}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              {...register("cantidad")}
             />
             {errors.cantidad && (
               <p className="text-sm text-destructive">
@@ -137,10 +141,10 @@ export function VentaModal({
             <Label htmlFor="precioUnitario">Precio Unitario</Label>
             <Input
               id="precioUnitario"
-              type="number"
-              step="0.01"
-              min="0"
-              {...register("precioUnitario", { valueAsNumber: true })}
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
+              {...register("precioUnitario")}
             />
             {errors.precioUnitario && (
               <p className="text-sm text-destructive">

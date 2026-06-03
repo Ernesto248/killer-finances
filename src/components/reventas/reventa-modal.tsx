@@ -98,7 +98,12 @@ export function ReventaModal({
   }, [open, reventa, reset, fetchPersonas]);
 
   const onFormSubmit = (data: ReventaWireFormData) => {
-    onSubmit(data);
+    onSubmit({
+      ...data,
+      montoUsd: Number(data.montoUsd) || 0,
+      tasaCompra: Number(data.tasaCompra) || 0,
+      tasaVenta: Number(data.tasaVenta) || 0,
+    });
     onOpenChange(false);
   };
 
@@ -191,10 +196,10 @@ export function ReventaModal({
             <Label htmlFor="montoUsd">Monto USD</Label>
             <Input
               id="montoUsd"
-              type="number"
-              step="0.01"
-              min="0.01"
-              {...register("montoUsd", { valueAsNumber: true })}
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*[.]?[0-9]*"
+              {...register("montoUsd")}
             />
             {errors.montoUsd && (
               <p className="text-sm text-destructive">
@@ -208,10 +213,10 @@ export function ReventaModal({
               <Label htmlFor="tasaCompra">Tasa de Compra</Label>
               <Input
                 id="tasaCompra"
-                type="number"
-                step="0.01"
-                min="0.01"
-                {...register("tasaCompra", { valueAsNumber: true })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
+                {...register("tasaCompra")}
               />
               {errors.tasaCompra && (
                 <p className="text-sm text-destructive">
@@ -223,10 +228,10 @@ export function ReventaModal({
               <Label htmlFor="tasaVenta">Tasa de Venta</Label>
               <Input
                 id="tasaVenta"
-                type="number"
-                step="0.01"
-                min="0.01"
-                {...register("tasaVenta", { valueAsNumber: true })}
+                type="text"
+                inputMode="decimal"
+                pattern="[0-9]*[.]?[0-9]*"
+                {...register("tasaVenta")}
               />
               {errors.tasaVenta && (
                 <p className="text-sm text-destructive">
