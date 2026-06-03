@@ -42,9 +42,9 @@ export function Sidebar() {
     : navigation;
 
   return (
-    <aside className="hidden md:flex h-screen w-64 flex-col border-r border-border bg-card">
+    <aside className="hidden md:flex h-screen w-72 flex-col border-r border-border bg-card">
       <div className="flex h-16 items-center border-b border-border px-6">
-        <h1 className="text-lg font-bold text-primary">Finanzas</h1>
+        <h1 className="text-xl font-bold text-primary">Finanzas</h1>
       </div>
       <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
         {filteredNav.map((item) => {
@@ -53,7 +53,7 @@ export function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-base font-medium transition-colors ${
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"

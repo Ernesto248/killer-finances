@@ -48,45 +48,6 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-body {
-  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
-  font-size: 1.125rem;
-  line-height: 1.5;
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
-  h2 { font-weight: 300; letter-spacing: 0.1px; }
-  h3 { font-size: 1.375rem; font-weight: 300; }
-  table th { font-weight: 600; font-size: 0.875rem; }
-  table td { padding: 14px 20px; font-size: 0.9375rem; }
-  button[class*="size-"] { min-width: unset; min-height: unset; }
-  input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="search"] {
-    min-height: 48px;
-    padding: 12px 16px;
-    font-size: 1rem;
-  }
-  select {
-    min-height: 48px;
-    padding: 0 16px;
-    font-size: 1rem;
-  }
-  [data-slot="button"], button:not([class*="size-"]) {
-    min-height: 44px;
-    padding: 10px 24px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-  }
-}
-
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -158,15 +119,13 @@ body {
   --sidebar-ring: #0070d1;
 }
 
-.card-hover {
-  transition: transform 0.2s ease;
-}
-.card-hover:hover {
-  transform: translateY(-1px);
+html {
+  font-size: 18px;
+  line-height: 1.5;
 }
 
-.ps-gradient-blue {
-  background: linear-gradient(180deg, #121314 0%, #000000 100%);
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
 @layer base {
@@ -179,4 +138,68 @@ body {
   html {
     @apply font-sans;
   }
+
+  h1 { font-size: 2.25rem !important; font-weight: 300 !important; letter-spacing: -0.1px; }
+  h2 { font-size: 1.75rem !important; font-weight: 300 !important; letter-spacing: 0.1px; }
+  h3 { font-size: 1.25rem !important; font-weight: 300 !important; }
+  h4 { font-size: 1.125rem !important; font-weight: 600 !important; }
+
+  [data-slot="button"] {
+    min-height: 46px !important;
+    height: auto !important;
+    padding: 10px 24px !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    border-radius: 9999px !important;
+  }
+
+  [data-slot="input"],
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"] {
+    min-height: 48px !important;
+    height: auto !important;
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    font-size: 1rem !important;
+    border-radius: 6px !important;
+  }
+
+  select {
+    min-height: 48px !important;
+    height: auto !important;
+    padding: 0 16px !important;
+    font-size: 1rem !important;
+  }
+
+  table th {
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    padding: 10px 16px !important;
+  }
+  table td {
+    padding: 14px 20px !important;
+    font-size: 0.9375rem !important;
+  }
+
+  [data-slot="badge"] {
+    font-size: 0.8125rem !important;
+    padding: 4px 10px !important;
+  }
+}
+
+.card-hover {
+  transition: transform 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-1px);
+}
+
+.ps-gradient-blue {
+  background: linear-gradient(180deg, #121314 0%, #000000 100%);
 }
