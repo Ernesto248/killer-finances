@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAuth } from "@/lib/auth";
 import { FileText, AlertCircle, TrendingUp } from "lucide-react";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,7 @@ export default async function ReportesPage() {
   ];
 
   return (
+    <PageTransition>
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Reportes</h2>
@@ -52,5 +54,6 @@ export default async function ReportesPage() {
         ))}
       </div>
     </div>
+    </PageTransition>
   );
 }

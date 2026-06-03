@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { WireDetailClient } from "./wire-detail-client";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,7 @@ export default async function WireDetailPage({ params }: PageProps) {
   const pendiente = total - pagado;
 
   return (
+    <PageTransition>
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button
@@ -224,5 +226,6 @@ export default async function WireDetailPage({ params }: PageProps) {
         </CardContent>
       </Card>
     </div>
+    </PageTransition>
   );
 }

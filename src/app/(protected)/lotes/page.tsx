@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth";
 import { LoteTable } from "@/components/lotes/lote-table";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +8,7 @@ export default async function LotesPage() {
   await requireAuth();
 
   return (
+    <PageTransition>
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Lotes</h2>
@@ -16,5 +18,6 @@ export default async function LotesPage() {
       </div>
       <LoteTable />
     </div>
+    </PageTransition>
   );
 }

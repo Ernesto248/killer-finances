@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { CuentaTable } from "@/components/cuentas/cuenta-table";
 import { redirect } from "next/navigation";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function CuentasBancariasPage() {
   const cuentas = JSON.parse(JSON.stringify(rawCuentas));
 
   return (
+    <PageTransition>
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Cuentas Bancarias</h2>
@@ -25,5 +27,6 @@ export default async function CuentasBancariasPage() {
       </div>
       <CuentaTable cuentas={cuentas} userRole={user.role} />
     </div>
+    </PageTransition>
   );
 }

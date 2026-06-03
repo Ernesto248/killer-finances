@@ -88,9 +88,33 @@ export function parseWhatsAppText(text: string): ParsedCuadre {
 }
 
 function extractNumber(str: string): number {
-  const cleaned = str.replace(/[^0-9.,]/g, "").replace(/\./g, "").replace(",", ".");
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? 0 : num;
+  const cleaned = str.replace(/[^0-9.,]/g, "");
+  if (!cleaned) return 0;
+
+  const hasDot = cleaned.includes(".");
+  const hasComma = cleaned.includes(",");
+
+  if (hasComma && !hasDot) {
+    const afterLastComma = cleaned.split(",").pop()!;
+    if (afterLastComma.length <= 2) {
+      return parseFloat(cleaned.replace(",", "."));
+    }
+    return parseFloat(cleaned.replace(/,/g, ""));
+  }
+
+  if (hasDot && !hasComma) {
+    const afterLastDot = cleaned.split(".").pop()!;
+    if (afterLastDot.length <= 2) {
+      return parseFloat(cleaned);
+    }
+    return parseFloat(cleaned.replace(/\./g, ""));
+  }
+
+  if (hasDot && hasComma) {
+    return parseFloat(cleaned.replace(/\./g, "").replace(",", "."));
+  }
+
+  return parseFloat(cleaned);
 }
 
 export type { ParsedCuadre, ParsedLinea };

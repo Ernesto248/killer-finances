@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DollarSign, Users, Clock, TrendingUp } from "lucide-react";
 import { TasaEltoqueCard } from "@/components/dashboard/tasa-eltoque-card";
+import { AnimatedCounter } from "@/components/dashboard/animated-counter";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 
 interface DashboardData {
@@ -66,7 +67,7 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+    <Card className="card-hover">
           <CardHeader><CardTitle className="text-sm">Tasa USD Global</CardTitle></CardHeader>
           <CardContent><div className="text-3xl font-bold text-primary">{formatNumber(data.tasaGlobal)}</div></CardContent>
         </Card>
@@ -87,7 +88,7 @@ interface KpiCardProps {
 
 function KpiCard({ title, value, subtitle, icon: Icon, loading, trend }: KpiCardProps) {
   return (
-    <Card>
+        <Card className="card-hover">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
@@ -96,7 +97,7 @@ function KpiCard({ title, value, subtitle, icon: Icon, loading, trend }: KpiCard
         {loading ? (
           <Skeleton className="h-8 w-24" />
         ) : (
-          <div className={`text-2xl font-bold ${trend === "+" ? "text-emerald-400" : ""}`}>{value}</div>
+          <div className={`text-2xl font-bold ${trend === "+" ? "text-emerald-400" : ""}`}><AnimatedCounter value={value} /></div>
         )}
         {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
       </CardContent>

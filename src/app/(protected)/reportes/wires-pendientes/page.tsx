@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +56,7 @@ export default async function WiresPendientesPage() {
   };
 
   return (
+    <PageTransition>
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Wires Pendientes</h2>
@@ -136,5 +138,6 @@ export default async function WiresPendientesPage() {
         </CardContent>
       </Card>
     </div>
+    </PageTransition>
   );
 }

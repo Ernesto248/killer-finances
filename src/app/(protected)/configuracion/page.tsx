@@ -1,6 +1,7 @@
 import { requireRole } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ConfiguracionClient } from "./configuracion-client";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -12,5 +13,5 @@ export default async function ConfiguracionPage() {
     config = await prisma.configuracion.create({ data: { id: "global", tasaUsdGlobal: 600 } });
   }
 
-  return <ConfiguracionClient tasaUsdGlobal={Number(config.tasaUsdGlobal)} />;
+  return <PageTransition><ConfiguracionClient tasaUsdGlobal={Number(config.tasaUsdGlobal)} /></PageTransition>;
 }

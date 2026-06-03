@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { VentasSection } from "@/components/lotes/ventas-section";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,7 @@ export default async function LoteDetailPage({ params }: PageProps) {
   if (!lote) notFound();
 
   return (
+    <PageTransition>
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button
@@ -245,5 +247,6 @@ export default async function LoteDetailPage({ params }: PageProps) {
         </Card>
       )}
     </div>
+    </PageTransition>
   );
 }

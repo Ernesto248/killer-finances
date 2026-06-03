@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,7 @@ export default async function CuadreDetailPage({ params }: PageProps) {
   if (!cuadre) notFound();
 
   return (
+    <PageTransition>
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button
@@ -186,5 +188,6 @@ export default async function CuadreDetailPage({ params }: PageProps) {
         </Card>
       )}
     </div>
+    </PageTransition>
   );
 }
