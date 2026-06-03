@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { ExpandableCard } from "@/components/shared/expandable-card";
+import { FAB } from "@/components/shared/fab";
 import {
   Search,
   Plus,
@@ -201,107 +203,201 @@ export function PersonaTable() {
         )}
       </div>
 
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            {search
-              ? "No se encontraron personas con ese criterio"
-              : "No hay personas registradas"}
-          </p>
-        </div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Alias</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead className="text-right">Balance USD</TableHead>
-              <TableHead className="text-right">Balance CUP</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="w-10" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <AnimatePresence mode="popLayout">
-              {filtered.map((p) => (
-                <motion.tr
+      {/* MOBILE: Card view */}
+      <div className="md:hidden space-y-3">
+        <AnimatePresence>
+          {filtered.length === 0 ? (
+            <div className="text-center py-12 text-[#6b7280] text-sm">
+              {search
+                ? "No se encontraron personas con ese criterio"
+                : "No hay personas registradas"}
+            </div>
+          ) : (
+            filtered.map((p, i) => {
+              const usd = toNumber(p.balanceUsd);
+              const cup = toNumber(p.balanceCup);
+              return (
+                <motion.div
                   key={p.id}
-                  layout
-                  initial={{ opacity: 0, y: -8 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.15 }}
-                  className="border-b transition-colors hover:bg-muted/50"
+                  transition={{ delay: i * 0.03 }}
                 >
-                  <TableCell className="font-medium">{p.nombre}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {p.alias || "\u2014"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{p.tipo}</Badge>
-                  </TableCell>
-                  <TableCell
-                    className={`text-right font-mono ${
-                      toNumber(p.balanceUsd) >= 0
-                        ? "text-[#30d158]"
-                        : "text-destructive"
-                    }`}
+                  <ExpandableCard
+                    header={
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-[#1a1a1a] truncate">{p.nombre}</p>
+                          <p className="text-xs text-[#6b7280]">{p.alias || "\u2014"}</p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-2">
+                          <Badge variant="outline" className="text-xs">{p.tipo}</Badge>
+                          <div className="text-right">
+                            <p className={`text-xs font-mono ${usd >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}>
+                              {formatCurrency(usd, "USD")}
+                            </p>
+                            <p className={`text-xs font-mono ${cup >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}>
+                              {formatCurrency(cup, "CUP")}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    }
                   >
-                    {formatCurrency(toNumber(p.balanceUsd), "USD")}
-                  </TableCell>
-                  <TableCell
-                    className={`text-right font-mono ${
-                      toNumber(p.balanceCup) >= 0
-                        ? "text-[#30d158]"
-                        : "text-destructive"
-                    }`}
-                  >
-                    {formatCurrency(toNumber(p.balanceCup), "CUP")}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={p.activo ? "default" : "secondary"}>
-                      {p.activo ? "Activo" : "Inactivo"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-8 w-8">
-                        <MoreHorizontal className="size-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {userCanEdit && (
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setEditing(p);
-                              setModalOpen(true);
-                            }}
-                          >
-                            <Pencil className="size-4" />
-                            Editar
-                          </DropdownMenuItem>
-                        )}
-                        {userIsAdmin && (
-                          <>
-                            {userCanEdit && <DropdownMenuSeparator />}
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => setDeleteTarget(p)}
+                    <div className="space-y-3 pt-3">
+                      {(userCanEdit || userIsAdmin) && (
+                        <div className="flex items-center gap-2">
+                          {userCanEdit && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="flex-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditing(p);
+                                setModalOpen(true);
+                              }}
                             >
-                              <Trash2 className="size-4" />
+                              Editar
+                            </Button>
+                          )}
+                          {userIsAdmin && (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="flex-1"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeleteTarget(p);
+                              }}
+                            >
                               Eliminar
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </ExpandableCard>
+                </motion.div>
+              );
+            })
+          )}
+        </AnimatePresence>
+        {userCanEdit && (
+          <FAB
+            onClick={() => {
+              setEditing(null);
+              setModalOpen(true);
+            }}
+            label="Nuevo"
+          />
+        )}
+      </div>
+
+      {/* DESKTOP: Table view */}
+      <div className="hidden md:block">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              {search
+                ? "No se encontraron personas con ese criterio"
+                : "No hay personas registradas"}
+            </p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Alias</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Balance USD</TableHead>
+                <TableHead className="text-right">Balance CUP</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead className="w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <AnimatePresence mode="popLayout">
+                {filtered.map((p) => (
+                  <motion.tr
+                    key={p.id}
+                    layout
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="border-b transition-colors hover:bg-muted/50"
+                  >
+                    <TableCell className="font-medium">{p.nombre}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {p.alias || "\u2014"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{p.tipo}</Badge>
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-mono ${
+                        toNumber(p.balanceUsd) >= 0
+                          ? "text-[#30d158]"
+                          : "text-destructive"
+                      }`}
+                    >
+                      {formatCurrency(toNumber(p.balanceUsd), "USD")}
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-mono ${
+                        toNumber(p.balanceCup) >= 0
+                          ? "text-[#30d158]"
+                          : "text-destructive"
+                      }`}
+                    >
+                      {formatCurrency(toNumber(p.balanceCup), "CUP")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={p.activo ? "default" : "secondary"}>
+                        {p.activo ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-8 w-8">
+                          <MoreHorizontal className="size-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {userCanEdit && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setEditing(p);
+                                setModalOpen(true);
+                              }}
+                            >
+                              <Pencil className="size-4" />
+                              Editar
                             </DropdownMenuItem>
-                          </>
-                        )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </TableBody>
-        </Table>
-      )}
+                          )}
+                          {userIsAdmin && (
+                            <>
+                              {userCanEdit && <DropdownMenuSeparator />}
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => setDeleteTarget(p)}
+                              >
+                                <Trash2 className="size-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </TableBody>
+          </Table>
+        )}
+      </div>
 
       <PersonaModal
         open={modalOpen}

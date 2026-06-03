@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, ArrowRightLeft, Repeat, DollarSign } from "lucide-react";
+import { TrendingUp, ArrowRightLeft, Repeat, DollarSign, BarChart3 } from "lucide-react";
+import { BarChart, Bar, XAxis, ResponsiveContainer, Cell } from "recharts";
 
 interface GananciasData {
   gananciaWiresCup: number;
@@ -37,6 +38,12 @@ const meses = [
   { value: "11", label: "Noviembre" },
   { value: "12", label: "Diciembre" },
 ];
+
+const BAR_COLORS = {
+  "Ganancias Wire": "#2563eb",
+  "Ganancias Reventa": "#059669",
+  "Comisiones USD": "#dc2626",
+};
 
 export function GananciasClient() {
   const now = new Date();
@@ -75,6 +82,26 @@ export function GananciasClient() {
   };
 
   const gananciaTotalCup = (data?.gananciaWiresCup ?? 0) + (data?.gananciaReventasCup ?? 0);
+
+  const chartData = data
+    ? [
+        {
+          name: "Ganancias Wire",
+          value: data.gananciaWiresCup,
+          subtitle: `${data.totalWires} wires`,
+        },
+        {
+          name: "Ganancias Reventa",
+          value: data.gananciaReventasCup,
+          subtitle: `${data.totalReventas} reventas`,
+        },
+        {
+          name: "Comisiones USD",
+          value: data.gananciaComisionesUsd,
+          subtitle: "",
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-6">
@@ -128,6 +155,37 @@ export function GananciasClient() {
 
       {data && (
         <>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Ganancias por Tipo
+              </CardTitle>
+              <BarChart3 className="h-4 w-4 text-[#2563eb]" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 12, fill: "#6b7280" }}
+                      axisLine={{ stroke: "#e5e7eb" }}
+                      tickLine={false}
+                    />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                      {chartData.map((entry) => (
+                        <Cell
+                          key={entry.name}
+                          fill={BAR_COLORS[entry.name as keyof typeof BAR_COLORS] ?? "#2563eb"}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -182,10 +240,10 @@ export function GananciasClient() {
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Ganancia Total CUP
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-primary" />
+              <TrendingUp className="h-4 w-4 text-[#2563eb]" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">
+              <div className="text-3xl font-bold text-[#2563eb]">
                 {formatCurrency(gananciaTotalCup, "CUP")}
               </div>
               <p className="text-xs text-muted-foreground">Periodo: {data.periodo}</p>

@@ -4,6 +4,8 @@ import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { ExpandableCard } from "@/components/shared/expandable-card";
+import { FAB } from "@/components/shared/fab";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import {
   Table,
@@ -190,88 +192,173 @@ export function CuentaTable({ cuentas: initialCuentas, userRole }: CuentaTablePr
         )}
       </div>
 
-      {cuentas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No hay cuentas bancarias registradas
-          </p>
-        </div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Moneda</TableHead>
-              <TableHead className="text-right">Saldo</TableHead>
-              <TableHead className="w-10" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <AnimatePresence mode="popLayout">
-              {cuentas.map((c) => (
-                <motion.tr
-                  key={c.id}
-                  layout
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.15 }}
-                  className="border-b transition-colors hover:bg-muted/50"
+      {/* MOBILE: Card view */}
+      <div className="md:hidden space-y-3">
+        <AnimatePresence>
+          {cuentas.length === 0 ? (
+            <div className="text-center py-12 text-[#6b7280] text-sm">
+              No hay cuentas bancarias registradas
+            </div>
+          ) : (
+            cuentas.map((c, i) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+              >
+                <ExpandableCard
+                  header={
+                    <div className="flex items-center justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-[#1a1a1a] truncate">{c.nombre}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <Badge variant="secondary" className="text-xs">{tipoLabels[c.tipo]}</Badge>
+                          <Badge variant="outline" className="text-xs">{monedaLabels[c.moneda]}</Badge>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0 ml-2">
+                        <p className="text-sm font-mono text-[#1a1a1a]">
+                          {formatCurrency(toNumber(c.saldoActual), c.moneda as "USD" | "CUP")}
+                        </p>
+                      </div>
+                    </div>
+                  }
                 >
-                  <TableCell className="font-medium">{c.nombre}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{tipoLabels[c.tipo]}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={c.moneda === "USD" ? "default" : "secondary"}
-                      className={c.moneda === "USD" ? "bg-[#30d158] hover:bg-[#30d158]/80" : ""}
-                    >
-                      {monedaLabels[c.moneda]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatCurrency(toNumber(c.saldoActual), c.moneda as "USD" | "CUP")}
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-8 w-8">
-                        <MoreHorizontal className="size-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                  <div className="space-y-3 pt-3">
+                    {(userCanEdit || userIsAdmin) && (
+                      <div className="flex items-center gap-2">
                         {userCanEdit && (
-                          <DropdownMenuItem
-                            onClick={() => {
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setEditing(c);
                               setModalOpen(true);
                             }}
                           >
-                            <Pencil className="size-4" />
                             Editar
-                          </DropdownMenuItem>
+                          </Button>
                         )}
                         {userIsAdmin && (
-                          <>
-                            {userCanEdit && <DropdownMenuSeparator />}
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => setDeleteTarget(c)}
-                            >
-                              <Trash2 className="size-4" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(c);
+                            }}
+                          >
+                            Eliminar
+                          </Button>
                         )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </TableBody>
-        </Table>
-      )}
+                      </div>
+                    )}
+                  </div>
+                </ExpandableCard>
+              </motion.div>
+            ))
+          )}
+        </AnimatePresence>
+        {userCanEdit && (
+          <FAB
+            onClick={() => {
+              setEditing(null);
+              setModalOpen(true);
+            }}
+            label="Nuevo"
+          />
+        )}
+      </div>
+
+      {/* DESKTOP: Table view */}
+      <div className="hidden md:block">
+        {cuentas.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No hay cuentas bancarias registradas
+            </p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Moneda</TableHead>
+                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <AnimatePresence mode="popLayout">
+                {cuentas.map((c) => (
+                  <motion.tr
+                    key={c.id}
+                    layout
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="border-b transition-colors hover:bg-muted/50"
+                  >
+                    <TableCell className="font-medium">{c.nombre}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{tipoLabels[c.tipo]}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={c.moneda === "USD" ? "default" : "secondary"}
+                        className={c.moneda === "USD" ? "bg-[#30d158] hover:bg-[#30d158]/80" : ""}
+                      >
+                        {monedaLabels[c.moneda]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {formatCurrency(toNumber(c.saldoActual), c.moneda as "USD" | "CUP")}
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-8 w-8">
+                          <MoreHorizontal className="size-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {userCanEdit && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setEditing(c);
+                                setModalOpen(true);
+                              }}
+                            >
+                              <Pencil className="size-4" />
+                              Editar
+                            </DropdownMenuItem>
+                          )}
+                          {userIsAdmin && (
+                            <>
+                              {userCanEdit && <DropdownMenuSeparator />}
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => setDeleteTarget(c)}
+                              >
+                                <Trash2 className="size-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </TableBody>
+          </Table>
+        )}
+      </div>
 
       <CuentaModal
         open={modalOpen}

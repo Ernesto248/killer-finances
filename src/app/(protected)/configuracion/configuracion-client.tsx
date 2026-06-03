@@ -56,7 +56,7 @@ export function ConfiguracionClient({ tasaUsdGlobal: initialTasa }: { tasaUsdGlo
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="tasa">Tasa actual (CUP por USD)</Label>
+            <Label htmlFor="tasa" className="text-sm font-medium text-[#1a1a1a]">Tasa actual (CUP por USD)</Label>
             <Input
               id="tasa"
               type="number"
@@ -64,9 +64,10 @@ export function ConfiguracionClient({ tasaUsdGlobal: initialTasa }: { tasaUsdGlo
               step="0.01"
               value={tasa}
               onChange={(e) => setTasa(e.target.value)}
+              className="border-[#d1d5db] focus-visible:ring-[#2563eb]"
             />
           </div>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving} className="bg-[#2563eb] hover:bg-[#1d4ed8]">
             {saving ? "Guardando..." : "Guardar"}
           </Button>
         </CardContent>

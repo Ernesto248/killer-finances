@@ -104,7 +104,7 @@ export default async function CuadreDetailPage({ params }: PageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-mono text-destructive">
+            <div className="text-2xl font-bold font-mono text-[#dc2626]">
               {formatCurrency(num(cuadre.pagadoCup), "CUP")}
             </div>
           </CardContent>

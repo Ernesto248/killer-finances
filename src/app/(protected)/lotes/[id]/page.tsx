@@ -94,7 +94,7 @@ export default async function LoteDetailPage({ params }: PageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-mono text-[#30d158]">
+            <div className="text-2xl font-bold font-mono text-[#059669]">
               {formatCurrency(num(lote.costoTotal), lote.monedaCosto as "USD" | "CUP")}
             </div>
           </CardContent>

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatNumber } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -10,17 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileText, DollarSign, ArrowRightLeft } from "lucide-react";
 import { PageTransition } from "@/components/shared/page-transition";
+import { Timeline } from "@/components/shared/timeline";
 
 export const dynamic = "force-dynamic";
 
@@ -98,8 +91,8 @@ export default async function PersonaDetailPage({ params }: PageProps) {
             <div
               className={`text-2xl font-bold font-mono ${
                 num(persona.balanceUsd) >= 0
-                  ? "text-[#30d158]"
-                  : "text-destructive"
+                  ? "text-[#059669]"
+                  : "text-[#dc2626]"
               }`}
             >
               {formatCurrency(num(persona.balanceUsd), "USD")}
@@ -116,8 +109,8 @@ export default async function PersonaDetailPage({ params }: PageProps) {
             <div
               className={`text-2xl font-bold font-mono ${
                 num(persona.balanceCup) >= 0
-                  ? "text-[#30d158]"
-                  : "text-destructive"
+                  ? "text-[#059669]"
+                  : "text-[#dc2626]"
               }`}
             >
               {formatCurrency(num(persona.balanceCup), "CUP")}
@@ -126,128 +119,43 @@ export default async function PersonaDetailPage({ params }: PageProps) {
         </Card>
       </div>
 
-      {persona.cuadres.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Ultimos Cuadres</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Total Zelle USD</TableHead>
-                  <TableHead>Deuda Final CUP</TableHead>
-                  <TableHead>Tasa Prom.</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {persona.cuadres.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell>
-                      {new Date(c.fecha).toLocaleDateString("es-CU")}
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {formatCurrency(num(c.totalZelleUsd), "USD")}
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {formatCurrency(num(c.deudaFinalCup), "CUP")}
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {num(c.tasaPromedioCup).toFixed(2)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {persona.pagos.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Ultimos Pagos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Monto</TableHead>
-                  <TableHead>Moneda</TableHead>
-                  <TableHead>Descripcion</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {persona.pagos.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell>
-                      {new Date(p.fecha).toLocaleDateString("es-CU")}
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {formatCurrency(
-                        num(p.monto),
-                        p.moneda as "USD" | "CUP"
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{p.moneda}</Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {p.descripcion || "\u2014"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-
-      {persona.wiresComprados.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Wires Pendientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Monto USD</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Pagado CUP</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {persona.wiresComprados.map((w) => (
-                  <TableRow key={w.id}>
-                    <TableCell>
-                      {new Date(w.fecha).toLocaleDateString("es-CU")}
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {formatCurrency(num(w.montoUsd), "USD")}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          w.estado === "PENDIENTE" ? "secondary" : "default"
-                        }
-                      >
-                        {w.estado}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {formatCurrency(num(w.montoPagadoCup), "CUP")}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle>Actividad Reciente</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Timeline events={[
+            ...persona.cuadres.map(c => ({
+              id: c.id,
+              title: `Cuadre — +${formatCurrency(Number(c.totalZelleUsd), "USD")}`,
+              subtitle: `Tasa promedio: ${formatNumber(Number(c.tasaPromedioCup))}`,
+              date: new Date(c.fecha).toLocaleDateString("es-CU"),
+              icon: <FileText className="size-4 text-[#2563eb]" />,
+              amount: formatCurrency(Number(c.deudaFinalCup), "CUP"),
+              amountColor: "green" as const,
+              link: `/cuadres/${c.id}`,
+            })),
+            ...persona.pagos.map(p => ({
+              id: p.id,
+              title: "Pago registrado",
+              subtitle: p.descripcion || "Sin descripcion",
+              date: new Date(p.fecha).toLocaleDateString("es-CU"),
+              icon: <DollarSign className="size-4 text-[#dc2626]" />,
+              amount: `-${formatCurrency(Number(p.monto), p.moneda as "USD" | "CUP")}`,
+              amountColor: "red" as const,
+            })),
+            ...persona.wiresComprados.map(w => ({
+              id: w.id,
+              title: `Wire — ${formatCurrency(Number(w.montoUsd), "USD")} @ ${formatNumber(Number(w.tasaPactada))}`,
+              subtitle: `Estado: ${w.estado}`,
+              date: new Date(w.fecha).toLocaleDateString("es-CU"),
+              icon: <ArrowRightLeft className="size-4 text-[#2563eb]" />,
+              amount: formatCurrency(Number(w.montoCupTotal) - Number(w.montoPagadoCup), "CUP"),
+              amountColor: w.estado === "PAGADO" ? "green" as const : "default" as const,
+            })),
+          ].sort((a, b) => new Date(b.date.split("/").reverse().join("-")).getTime() - new Date(a.date.split("/").reverse().join("-")).getTime()).slice(0, 30)} />
+        </CardContent>
+      </Card>
     </div>
     </PageTransition>
   );

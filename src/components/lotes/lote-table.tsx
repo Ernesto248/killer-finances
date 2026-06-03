@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { ExpandableCard } from "@/components/shared/expandable-card";
+import { FAB } from "@/components/shared/fab";
 import Link from "next/link";
 import {
   Search,
@@ -216,101 +218,199 @@ export function LoteTable() {
         )}
       </div>
 
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            {search
-              ? "No se encontraron lotes con ese criterio"
-              : "No hay lotes registrados"}
-          </p>
-        </div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Fecha Compra</TableHead>
-              <TableHead className="text-right">Costo</TableHead>
-              <TableHead>Moneda</TableHead>
-              <TableHead>Productos</TableHead>
-              <TableHead className="w-10" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <AnimatePresence mode="popLayout">
-              {filtered.map((l) => (
-                <motion.tr
-                  key={l.id}
-                  layout
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.15 }}
-                  className="border-b transition-colors hover:bg-muted/50"
+      {/* MOBILE: Card view */}
+      <div className="md:hidden space-y-3">
+        <AnimatePresence>
+          {filtered.length === 0 ? (
+            <div className="text-center py-12 text-[#6b7280] text-sm">
+              {search
+                ? "No se encontraron lotes con ese criterio"
+                : "No hay lotes registrados"}
+            </div>
+          ) : (
+            filtered.map((l, i) => (
+              <motion.div
+                key={l.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+              >
+                <ExpandableCard
+                  header={
+                    <div className="flex items-center justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-[#1a1a1a] truncate">{l.nombre}</p>
+                        <p className="text-xs text-[#6b7280]">{new Date(l.fechaCompra).toLocaleDateString("es-CU")}</p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <p className="text-sm font-mono">
+                          {formatCurrency(toNumber(l.costoTotal), l.monedaCosto as "USD" | "CUP")}
+                        </p>
+                        <Badge variant="secondary" className="text-xs">
+                          {l.productos.length} prod.
+                        </Badge>
+                      </div>
+                    </div>
+                  }
                 >
-                  <TableCell className="font-medium">
+                  <div className="space-y-3 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-[#6b7280]">Moneda Costo</span>
+                      <Badge variant="outline" className="text-xs">{l.monedaCosto}</Badge>
+                    </div>
                     <Link
                       href={`/lotes/${l.id}`}
-                      className="hover:underline"
+                      className="block text-center text-sm text-[#2563eb] hover:underline"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {l.nombre}
+                      Ver detalle
                     </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(l.fechaCompra).toLocaleDateString("es-CU")}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatCurrency(
-                      toNumber(l.costoTotal),
-                      l.monedaCosto as "USD" | "CUP"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{l.monedaCosto}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {l.productos.length} productos
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-8 w-8">
-                        <MoreHorizontal className="size-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                    {(userCanEdit || userIsAdmin) && (
+                      <div className="flex items-center gap-2">
                         {userCanEdit && (
-                          <DropdownMenuItem
-                            onClick={() => {
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setEditing(l);
                               setModalOpen(true);
                             }}
                           >
-                            <Pencil className="size-4" />
                             Editar
-                          </DropdownMenuItem>
+                          </Button>
                         )}
                         {userIsAdmin && (
-                          <>
-                            {userCanEdit && <DropdownMenuSeparator />}
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => setDeleteTarget(l)}
-                            >
-                              <Trash2 className="size-4" />
-                              Eliminar
-                            </DropdownMenuItem>
-                          </>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTarget(l);
+                            }}
+                          >
+                            Eliminar
+                          </Button>
                         )}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </motion.tr>
-              ))}
-            </AnimatePresence>
-          </TableBody>
-        </Table>
-      )}
+                      </div>
+                    )}
+                  </div>
+                </ExpandableCard>
+              </motion.div>
+            ))
+          )}
+        </AnimatePresence>
+        {userCanEdit && (
+          <FAB
+            onClick={() => {
+              setEditing(null);
+              setModalOpen(true);
+            }}
+            label="Nuevo"
+          />
+        )}
+      </div>
+
+      {/* DESKTOP: Table view */}
+      <div className="hidden md:block">
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              {search
+                ? "No se encontraron lotes con ese criterio"
+                : "No hay lotes registrados"}
+            </p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Fecha Compra</TableHead>
+                <TableHead className="text-right">Costo</TableHead>
+                <TableHead>Moneda</TableHead>
+                <TableHead>Productos</TableHead>
+                <TableHead className="w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <AnimatePresence mode="popLayout">
+                {filtered.map((l) => (
+                  <motion.tr
+                    key={l.id}
+                    layout
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="border-b transition-colors hover:bg-muted/50"
+                  >
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/lotes/${l.id}`}
+                        className="hover:underline"
+                      >
+                        {l.nombre}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {new Date(l.fechaCompra).toLocaleDateString("es-CU")}
+                    </TableCell>
+                    <TableCell className="text-right font-mono">
+                      {formatCurrency(
+                        toNumber(l.costoTotal),
+                        l.monedaCosto as "USD" | "CUP"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{l.monedaCosto}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {l.productos.length} productos
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring h-8 w-8">
+                          <MoreHorizontal className="size-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {userCanEdit && (
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setEditing(l);
+                                setModalOpen(true);
+                              }}
+                            >
+                              <Pencil className="size-4" />
+                              Editar
+                            </DropdownMenuItem>
+                          )}
+                          {userIsAdmin && (
+                            <>
+                              {userCanEdit && <DropdownMenuSeparator />}
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => setDeleteTarget(l)}
+                              >
+                                <Trash2 className="size-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
+            </TableBody>
+          </Table>
+        )}
+      </div>
 
       <LoteModal
         open={modalOpen}
