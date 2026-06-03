@@ -128,7 +128,7 @@ export function LoteTable() {
         toast.error(err.error || "Error al crear lote");
         return;
       }
-      toast.success("Lote creado");
+      toast.success("Proyecto creado");
       fetchLotes();
     } catch {
       toast.error("Error al crear lote");
@@ -148,7 +148,7 @@ export function LoteTable() {
         toast.error(err.error || "Error al actualizar");
         return;
       }
-      toast.success("Lote actualizado");
+      toast.success("Proyecto actualizado");
       setEditing(null);
       fetchLotes();
     } catch {
@@ -166,7 +166,7 @@ export function LoteTable() {
         toast.error("Error al eliminar lote");
         return;
       }
-      toast.success("Lote eliminado");
+      toast.success("Proyecto eliminado");
       setDeleteTarget(null);
       fetchLotes();
     } catch {
@@ -213,7 +213,7 @@ export function LoteTable() {
             }}
           >
             <Plus className="size-4" />
-            Nuevo Lote
+Nuevo Proyecto
           </Button>
         )}
       </div>
@@ -401,7 +401,7 @@ export function LoteTable() {
       <LoteModal
         open={modalOpen}
         onOpenChange={setModalOpen}
-        title={editing ? "Editar Lote" : "Nuevo Lote"}
+        title={editing ? "Editar Proyecto" : "Nuevo Proyecto"}
         defaultValues={editing ? loteToFormData(editing) : undefined}
         onSubmit={editing ? handleUpdate : handleCreate}
       />
@@ -411,7 +411,7 @@ export function LoteTable() {
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null);
         }}
-        title="Eliminar Lote"
+        title="Eliminar Proyecto"
         description={`Esta seguro que desea eliminar "${deleteTarget?.nombre}"? Esta accion no se puede deshacer.`}
         confirmLabel="Eliminar"
         variant="destructive"

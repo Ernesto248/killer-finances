@@ -15,12 +15,12 @@ export function formatNumber(amount: number): string {
 export function formatCurrency(amount: number, currency: "USD" | "CUP"): string {
   if (currency === "USD") {
     return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    }).format(amount);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount) + " USD";
   }
   return new Intl.NumberFormat("es-CU", {
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount) + " CUP";
 }

@@ -222,10 +222,11 @@ export function PersonaTable() {
                       <div className="flex items-center justify-between">
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-[#1a1a1a] truncate">{p.nombre}</p>
-                          <p className="text-xs text-[#6b7280]">{p.alias || "\u2014"}</p>
+                          <p className="text-xs text-[#6b7280]">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">{p.tipo}</Badge>
+                          </p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0 ml-2">
-                          <Badge variant="outline" className="text-xs">{p.tipo}</Badge>
                           <div className="text-right">
                             <p className={`text-xs font-mono ${usd >= 0 ? "text-[#059669]" : "text-[#dc2626]"}`}>
                               {formatCurrency(usd, "USD")}

@@ -11,7 +11,7 @@ export default async function LotesPage() {
     <PageTransition>
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Lotes</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Proyectos</h2>
         <p className="text-muted-foreground">
           Gestiona tus lotes, productos y ventas
         </p>

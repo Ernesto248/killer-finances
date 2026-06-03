@@ -16,7 +16,7 @@ const navigation = [
   { name: "Cuadres", href: "/cuadres", icon: ClipboardList, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Wires", href: "/wires", icon: ArrowRightLeft, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Reventas", href: "/reventas", icon: Repeat, roles: ["ADMIN", "EDITOR", "VISOR"] },
-  { name: "Lotes", href: "/lotes", icon: Package, roles: ["ADMIN", "EDITOR", "VISOR"] },
+  { name: "Proyectos", href: "/lotes", icon: Package, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Gastos", href: "/gastos", icon: DollarSign, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Cuentas", href: "/cuentas-bancarias", icon: Building2, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Reportes", href: "/reportes", icon: BarChart3, roles: ["ADMIN", "EDITOR", "VISOR"] },
