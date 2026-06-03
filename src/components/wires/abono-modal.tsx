@@ -63,7 +63,10 @@ export function AbonoModal({
   }, [open, reset]);
 
   const onFormSubmit = async (data: AbonoWireFormData) => {
-    await onSubmit(data);
+    await onSubmit({
+      ...data,
+      monto: Number(data.monto) || 0,
+    });
     onOpenChange(false);
   };
 
@@ -84,10 +87,9 @@ export function AbonoModal({
             <Label htmlFor="monto">Monto</Label>
             <Input
               id="monto"
-              type="number"
-              step="0.01"
-              min="0.01"
-              {...register("monto", { valueAsNumber: true })}
+              type="text"
+              inputMode="decimal"
+              {...register("monto")}
             />
             {errors.monto && (
               <p className="text-sm text-destructive">{errors.monto.message}</p>

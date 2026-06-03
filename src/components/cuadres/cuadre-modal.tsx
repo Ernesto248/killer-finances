@@ -346,18 +346,18 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                   <Label htmlFor="deudaInicial">Deuda Inicial CUP</Label>
                   <Input
                     id="deudaInicial"
-                    type="number"
-                    step="0.01"
-                    {...register("deudaInicialCup", { valueAsNumber: true })}
+                    type="text"
+                    inputMode="decimal"
+                    {...register("deudaInicialCup")}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="pagado">Pagado CUP</Label>
                   <Input
                     id="pagado"
-                    type="number"
-                    step="0.01"
-                    {...register("pagadoCup", { valueAsNumber: true })}
+                    type="text"
+                    inputMode="decimal"
+                    {...register("pagadoCup")}
                   />
                 </div>
               </div>
@@ -392,8 +392,8 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                       <div>
                         <Label className="text-xs">USD</Label>
                         <Input
-                          type="number"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           value={l.montoUsd || ""}
                           onChange={(e) =>
                             updateLinea(
@@ -407,8 +407,8 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                       <div>
                         <Label className="text-xs">Tasa</Label>
                         <Input
-                          type="number"
-                          step="0.01"
+                          type="text"
+                          inputMode="decimal"
                           value={l.tasa || ""}
                           onChange={(e) =>
                             updateLinea(
@@ -440,9 +440,9 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                 <Label htmlFor="deudaFinal">Deuda Final CUP</Label>
                 <Input
                   id="deudaFinal"
-                  type="number"
-                  step="0.01"
-                  {...register("deudaFinalCup", { valueAsNumber: true })}
+                  type="text"
+                  inputMode="decimal"
+                  {...register("deudaFinalCup")}
                 />
               </div>
 
@@ -450,9 +450,9 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                 <Label htmlFor="totalZelle">Total Zelle USD</Label>
                 <Input
                   id="totalZelle"
-                  type="number"
-                  step="0.01"
-                  {...register("totalZelleUsd", { valueAsNumber: true })}
+                  type="text"
+                  inputMode="decimal"
+                  {...register("totalZelleUsd")}
                 />
               </div>
 
@@ -460,9 +460,9 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                 <Label htmlFor="tasaProm">Tasa Promedio</Label>
                 <Input
                   id="tasaProm"
-                  type="number"
-                  step="0.01"
-                  {...register("tasaPromedioCup", { valueAsNumber: true })}
+                  type="text"
+                  inputMode="decimal"
+                  {...register("tasaPromedioCup")}
                 />
               </div>
 
