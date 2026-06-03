@@ -1,9 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, Clock, TrendingUp } from "lucide-react";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency } from "@/lib/utils";
-import { TasaEltoqueCard } from "@/components/dashboard/tasa-eltoque-card";
+import { DashboardClient } from "./dashboard-client";
 
 export const dynamic = "force-dynamic";
 
@@ -12,111 +9,34 @@ export default async function DashboardPage() {
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const dateFilter = { gte: startOfMonth, lte: now };
 
-  const [
-    cuentas,
-    config,
-    remeserosActivos,
-    totalPersonas,
-    wiresPendientes,
-    gananciaCupWires,
-    gananciaCupReventas,
-    gananciaUsdLineas,
-  ] = await Promise.all([
-    prisma.cuentaBancaria.findMany(),
+  const [cuentasUsd, cuentasCup, gananciaCupWires, gananciaCupReventas, gananciaUsdCuadres,
+         totalRemeseros, remeserosActivos, wiresPendientes, config] = await Promise.all([
+    prisma.cuentaBancaria.aggregate({ where: { moneda: "USD" }, _sum: { saldoActual: true } }),
+    prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP" }, _sum: { saldoActual: true } }),
+    prisma.wire.aggregate({ where: { fecha: dateFilter }, _sum: { gananciaCup: true } }),
+    prisma.reventaWire.aggregate({ where: { fecha: dateFilter }, _sum: { gananciaCup: true } }),
+    prisma.lineaCuadre.aggregate({ where: { cuadre: { fecha: dateFilter } }, _sum: { gananciaUsd: true } }),
+    prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }),
+    prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }),
+    prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } }),
     prisma.configuracion.findUnique({ where: { id: "global" } }),
-    prisma.persona.count({ where: { tipo: "REMESERO", activo: true } }),
-    prisma.persona.count(),
-    prisma.wire.findMany({ where: { estado: { not: "PAGADO" } } }),
-    prisma.wire.aggregate({ where: { fecha: { gte: startOfMonth } }, _sum: { gananciaCup: true } }),
-    prisma.reventaWire.aggregate({ where: { fecha: { gte: startOfMonth } }, _sum: { gananciaCup: true } }),
-    prisma.lineaCuadre.aggregate({
-      where: { cuadre: { fecha: { gte: startOfMonth } } },
-      _sum: { gananciaUsd: true },
-    }),
   ]);
 
-  const sumUsd = cuentas.filter((c) => c.moneda === "USD").reduce((s, c) => s + Number(c.saldoActual), 0);
-  const sumCup = cuentas.filter((c) => c.moneda === "CUP").reduce((s, c) => s + Number(c.saldoActual), 0);
-  const tasaGlobal = Number(config?.tasaUsdGlobal ?? 600);
-
-  const pendienteCount = wiresPendientes.length;
-  const pendienteCup = wiresPendientes.reduce(
-    (s, w) => s + Number(w.montoCupTotal) - Number(w.montoPagadoCup),
-    0,
-  );
-
-  const gananciaCupMes = Number(gananciaCupWires._sum.gananciaCup ?? 0) + Number(gananciaCupReventas._sum.gananciaCup ?? 0);
-  const gananciaUsdMes = Number(gananciaUsdLineas._sum.gananciaUsd ?? 0);
-
-  const kpis = [
-    { title: "Balance USD", value: formatCurrency(sumUsd, "USD"), icon: DollarSign },
-    { title: "Balance CUP", value: formatCurrency(sumCup, "CUP"), icon: DollarSign },
-    { title: "Remeseros Activos", value: `${remeserosActivos} / ${totalPersonas}`, icon: Users },
-    {
-      title: "Wires Pendientes",
-      value: `${pendienteCount} (${formatCurrency(pendienteCup, "CUP")})`,
-      icon: Clock,
-    },
-  ];
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">Resumen general de tus finanzas</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi) => (
-          <Card key={kpi.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{kpi.title}</CardTitle>
-              <kpi.icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{kpi.value}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Ganancia CUP (este mes)
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(gananciaCupMes, "CUP")}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Ganancia USD (este mes)
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(gananciaUsdMes, "USD")}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle className="text-sm">Tasa USD Global</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-primary">
-              {formatCurrency(tasaGlobal, "CUP")}
-            </div>
-          </CardContent>
-        </Card>
-        <TasaEltoqueCard />
-      </div>
-    </div>
+    <DashboardClient
+      initialData={{
+        balanceUsd: Number(cuentasUsd._sum.saldoActual ?? 0),
+        balanceCup: Number(cuentasCup._sum.saldoActual ?? 0),
+        gananciaCup: Number(gananciaCupWires._sum.gananciaCup ?? 0) + Number(gananciaCupReventas._sum.gananciaCup ?? 0),
+        gananciaUsd: Number(gananciaUsdCuadres._sum.gananciaUsd ?? 0),
+        remeserosActivos,
+        totalRemeseros,
+        wiresPendientes: wiresPendientes.length,
+        wiresPendientesUsd: wiresPendientes.reduce((s, w) => s + Number(w.montoUsd), 0),
+        tasaGlobal: Number(config?.tasaUsdGlobal ?? 600),
+      }}
+    />
   );
 }
