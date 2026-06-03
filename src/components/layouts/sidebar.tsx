@@ -4,17 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
-  LayoutDashboard,
-  Users,
-  ClipboardList,
-  ArrowRightLeft,
-  Repeat,
-  Package,
-  DollarSign,
-  Building2,
-  Settings,
-  Shield,
-  BarChart3,
+  LayoutDashboard, Users, ClipboardList, ArrowRightLeft,
+  Repeat, Package, DollarSign, Building2, Settings, Shield, BarChart3,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import type { UserRole } from "@/types";
@@ -33,7 +24,7 @@ const navigation = [
   { name: "Usuarios", href: "/usuarios", icon: Shield, roles: ["ADMIN"] },
 ];
 
-export function Sidebar() {
+export function SidebarContent() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const role = session?.user?.role as UserRole | undefined;
@@ -43,8 +34,8 @@ export function Sidebar() {
     : navigation;
 
   return (
-    <aside className="flex h-screen w-60 flex-col bg-white border-r border-border">
-      <div className="flex h-14 items-center gap-2 px-5 border-b border-border">
+    <>
+      <div className="flex h-14 items-center gap-2 px-5 border-b border-border shrink-0">
         <div className="size-2 rounded-full bg-[#2563eb]" />
         <span className="text-base font-bold text-[#2563eb]">Finanzas</span>
       </div>
@@ -52,7 +43,6 @@ export function Sidebar() {
         {filteredNav.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           const isDivider = item.name === "Configuracion";
-
           return (
             <div key={item.name}>
               {isDivider && <Separator className="my-2" />}
@@ -71,6 +61,14 @@ export function Sidebar() {
           );
         })}
       </nav>
+    </>
+  );
+}
+
+export function Sidebar() {
+  return (
+    <aside className="hidden md:flex h-screen w-60 flex-col bg-white border-r border-border">
+      <SidebarContent />
     </aside>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+
 import { toast } from "sonner";
 import { ExpandableCard } from "@/components/shared/expandable-card";
 import { FAB } from "@/components/shared/fab";
@@ -100,19 +100,13 @@ export function CuadreTable() {
 
       {/* MOBILE: Card view */}
       <div className="md:hidden space-y-3">
-        <AnimatePresence>
-          {cuadres.length === 0 ? (
+        {cuadres.length === 0 ? (
             <div className="text-center py-12 text-[#6b7280] text-sm">
               No hay cuadres registrados
             </div>
           ) : (
-            cuadres.map((c, i) => (
-              <motion.div
-                key={c.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-              >
+            cuadres.map((c) => (
+              <div key={c.id}>
                 <ExpandableCard
                   header={
                     <div className="flex items-center justify-between">
@@ -146,10 +140,9 @@ export function CuadreTable() {
                     </Link>
                   </div>
                 </ExpandableCard>
-              </motion.div>
+              </div>
             ))
           )}
-        </AnimatePresence>
         {userCanEdit && (
           <FAB
             onClick={() => setModalOpen(true)}
@@ -178,15 +171,9 @@ export function CuadreTable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <AnimatePresence mode="popLayout">
                 {cuadres.map((c) => (
-                  <motion.tr
+                  <tr
                     key={c.id}
-                    layout
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
                     className="border-b transition-colors hover:bg-muted/50"
                   >
                     <TableCell>
@@ -214,9 +201,8 @@ export function CuadreTable() {
                     <TableCell className="text-right font-mono">
                       {formatCurrency(num(c.deudaFinalCup), "CUP")}
                     </TableCell>
-                  </motion.tr>
+                  </tr>
                 ))}
-              </AnimatePresence>
             </TableBody>
           </Table>
         )}

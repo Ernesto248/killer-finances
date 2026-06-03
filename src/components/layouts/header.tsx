@@ -3,7 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { Sidebar } from "./sidebar";
+import { SidebarContent } from "./sidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export function Header() {
@@ -20,8 +20,8 @@ export function Header() {
               </Button>
             }
           />
-          <SheetContent side="left" className="p-0 w-60">
-            <Sidebar />
+          <SheetContent side="left" className="p-0 w-60 [&>div]:flex [&>div]:flex-col">
+            <SidebarContent />
           </SheetContent>
         </Sheet>
         <span className="text-base font-bold text-[#1a1a1a]">Finanzas</span>

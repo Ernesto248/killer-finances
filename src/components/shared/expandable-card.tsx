@@ -22,9 +22,9 @@ export function ExpandableCard({ header, children, className, defaultExpanded = 
       onClick={() => setExpanded(!expanded)}
       whileTap={{ scale: 0.995 }}
     >
-      <div className="flex items-center justify-between p-4">
-        <div className="flex-1">{header}</div>
-        <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between p-4">
+        <div className="min-w-0">{header}</div>
+        <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }} className="self-end md:self-auto shrink-0">
           <ChevronDown className="size-4 text-[#9ca3af]" />
         </motion.div>
       </div>
