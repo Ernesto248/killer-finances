@@ -17,15 +17,15 @@ export async function GET(req: NextRequest) {
     const to = new Date(year, month, 0);
     to.setHours(23, 59, 59, 999);
 
-    const [gananciaWires, gananciaReventas, gananciaComisiones, totalWires, totalReventas] =
+    const [gananciaWires, gananciaReventasData, gananciaComisiones, totalWires, totalReventas] =
       await Promise.all([
         prisma.wire.aggregate({
           where: { fecha: { gte: from, lte: to } },
           _sum: { gananciaCup: true },
         }),
-        prisma.reventaWire.aggregate({
+        prisma.reventaWire.findMany({
           where: { fecha: { gte: from, lte: to } },
-          _sum: { gananciaCup: true },
+          select: { gananciaCup: true },
         }),
         prisma.lineaCuadre.aggregate({
           where: { cuadre: { fecha: { gte: from, lte: to } } },
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       gananciaWiresCup: Number(gananciaWires._sum.gananciaCup ?? 0),
-      gananciaReventasCup: Number(gananciaReventas._sum.gananciaCup ?? 0),
+      gananciaReventasCup: gananciaReventasData.reduce((s: number, r: any) => s + Number(r.gananciaCup), 0),
       gananciaComisionesUsd: Number(gananciaComisiones._sum.gananciaUsd ?? 0),
       totalWires,
       totalReventas,

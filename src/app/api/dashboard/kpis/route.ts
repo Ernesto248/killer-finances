@@ -19,14 +19,14 @@ export async function GET(req: NextRequest) {
     const whereReventa = hasDateFilter ? { fecha: dateFilter } : {};
 
     const [balanceBancosUsd, balanceEfectivoUsd, balanceBancosCup, balanceEfectivoCup,
-           gananciaCupWires, gananciaCupReventas, gananciaUsdCuadres,
+           gananciaCupWires, gananciaCupReventasData, gananciaUsdCuadres,
            totalRemeseros, remeserosActivos, wiresPendientes] = await Promise.all([
       prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: { in: ["ZELLE", "BANCO"] } }, _sum: { saldoActual: true } }),
       prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: "EFECTIVO" }, _sum: { saldoActual: true } }),
       prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP", tipo: { in: ["ZELLE", "BANCO"] } }, _sum: { saldoActual: true } }),
       prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP", tipo: "EFECTIVO" }, _sum: { saldoActual: true } }),
       prisma.wire.aggregate({ where: whereWire, _sum: { gananciaCup: true } }),
-      prisma.reventaWire.aggregate({ where: whereReventa, _sum: { gananciaCup: true } }),
+      prisma.reventaWire.findMany({ where: whereReventa, select: { gananciaCup: true } }),
       prisma.lineaCuadre.aggregate({ where: { cuadre: whereCuadre }, _sum: { gananciaUsd: true } }),
       prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }),
       prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }),
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
       balanceEfectivoCup: Number(balanceEfectivoCup._sum.saldoActual ?? 0),
       balanceUsd: Number(balanceBancosUsd._sum.saldoActual ?? 0) + Number(balanceEfectivoUsd._sum.saldoActual ?? 0),
       balanceCup: Number(balanceBancosCup._sum.saldoActual ?? 0) + Number(balanceEfectivoCup._sum.saldoActual ?? 0),
-      gananciaCup: Number(gananciaCupWires._sum.gananciaCup ?? 0) + Number(gananciaCupReventas._sum.gananciaCup ?? 0),
+      gananciaCup: Number(gananciaCupWires._sum.gananciaCup ?? 0) + gananciaCupReventasData.reduce((s, r: any) => s + Number(r.gananciaCup), 0),
       gananciaUsd: Number(gananciaUsdCuadres._sum.gananciaUsd ?? 0),
       remeserosActivos,
       totalRemeseros,
