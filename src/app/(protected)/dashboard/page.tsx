@@ -3,6 +3,7 @@ import { DollarSign, Users, Clock, TrendingUp } from "lucide-react";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
+import { TasaEltoqueCard } from "@/components/dashboard/tasa-eltoque-card";
 
 export const dynamic = "force-dynamic";
 
@@ -114,12 +115,7 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-sm">Tasa elTOQUE</CardTitle></CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-muted-foreground">Proximamente</div>
-          </CardContent>
-        </Card>
+        <TasaEltoqueCard />
       </div>
     </div>
   );
