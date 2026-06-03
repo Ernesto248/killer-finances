@@ -14,6 +14,7 @@ import {
   Building2,
   Settings,
   Shield,
+  BarChart3,
 } from "lucide-react";
 import type { UserRole } from "@/types";
 
@@ -26,6 +27,7 @@ const navigation = [
   { name: "Lotes", href: "/lotes", icon: Package, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Gastos", href: "/gastos", icon: DollarSign, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Cuentas", href: "/cuentas-bancarias", icon: Building2, roles: ["ADMIN", "EDITOR", "VISOR"] },
+  { name: "Reportes", href: "/reportes", icon: BarChart3, roles: ["ADMIN", "EDITOR", "VISOR"] },
   { name: "Configuracion", href: "/configuracion", icon: Settings, roles: ["ADMIN"] },
   { name: "Usuarios", href: "/usuarios", icon: Shield, roles: ["ADMIN"] },
 ];
