@@ -4,21 +4,19 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-fit w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full px-3.5 py-1 text-sm font-normal whitespace-nowrap transition-all",
+  "group/badge inline-flex h-fit w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap",
   {
     variants: {
       variant: {
-        default: "bg-[#0066cc]/20 text-[#0066cc]",
-        secondary: "bg-[#1c1c1e] text-[#7a7a7a] ring-1 ring-border",
-        destructive: "bg-[#ff453a]/10 text-[#ff453a]",
-        outline: "ring-1 ring-border text-foreground",
-        success: "bg-[#30d158]/15 text-[#30d158]",
-        warning: "bg-[#ff9f0a]/15 text-[#ff9f0a]",
+        default: "bg-[#eff6ff] text-[#2563eb]",
+        secondary: "bg-[#f3f4f6] text-[#6b7280] ring-1 ring-border",
+        destructive: "bg-[#fef2f2] text-[#dc2626]",
+        outline: "ring-1 ring-border text-[#1a1a1a]",
+        success: "bg-[#ecfdf5] text-[#059669]",
+        warning: "bg-[#fffbeb] text-[#d97706]",
       },
     },
-    defaultVariants: {
-      variant: "default",
-    },
+    defaultVariants: { variant: "default" },
   }
 )
 
@@ -30,10 +28,7 @@ function Badge({
 }: useRender.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
   return useRender({
     defaultTagName: "span",
-    props: mergeProps<"span">(
-      { className: cn(badgeVariants({ variant }), className) },
-      props
-    ),
+    props: mergeProps<"span">({ className: cn(badgeVariants({ variant }), className) }, props),
     render,
     state: { slot: "badge", variant },
   })

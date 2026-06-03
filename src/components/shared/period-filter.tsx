@@ -20,7 +20,7 @@ export function PeriodFilter({ value, onChange, className }: PeriodFilterProps) 
   ];
 
   return (
-    <div className={cn("flex gap-1.5", className)}>
+    <div className={cn("flex gap-1", className)}>
       {periods.map((p) => (
         <button
           key={p.value}
@@ -35,10 +35,10 @@ export function PeriodFilter({ value, onChange, className }: PeriodFilterProps) 
             onChange(p.value, from, to);
           }}
           className={cn(
-            "text-sm h-8 px-4 rounded-full border transition-colors whitespace-nowrap",
+            "text-xs h-8 px-3 rounded-lg border transition-colors whitespace-nowrap bg-white",
             value === p.value
-              ? "border-[#0066cc]/40 text-[#0066cc] bg-[#0066cc]/10"
-              : "border-border text-[#7a7a7a] hover:text-white hover:border-white/20"
+              ? "border-[#2563eb]/40 text-[#2563eb] bg-[#eff6ff]"
+              : "border-border text-[#6b7280] hover:text-[#1a1a1a] hover:border-[#d1d5db]"
           )}
         >
           {p.label}

@@ -3,27 +3,27 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center font-normal whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center font-medium whitespace-nowrap transition-all duration-200 outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563eb] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "bg-[#0066cc] text-white hover:bg-[#0077dd] rounded-full px-[22px] py-[11px]",
+          "bg-[#2563eb] text-white hover:bg-[#1d4ed8] rounded-xl px-5 py-2.5 shadow-sm",
         outline:
-          "border border-[#0066cc] text-[#0066cc] bg-transparent hover:bg-[#0066cc]/10 rounded-full px-[22px] py-[11px]",
+          "border border-[#2563eb]/30 text-[#2563eb] bg-white hover:bg-[#eff6ff] rounded-xl px-5 py-2.5",
         secondary:
-          "bg-[#1c1c1e] text-white hover:bg-[#2c2c2e] rounded-lg px-4 py-2 text-sm",
+          "bg-[#f3f4f6] text-[#1a1a1a] hover:bg-[#e5e7eb] rounded-xl px-4 py-2.5",
         ghost:
-          "text-[#7a7a7a] hover:text-white hover:bg-[rgba(255,255,255,0.06)] rounded-lg",
+          "text-[#6b7280] hover:text-[#1a1a1a] hover:bg-[#f3f4f6] rounded-lg",
         destructive:
-          "bg-[#ff453a]/10 text-[#ff453a] hover:bg-[#ff453a]/20 rounded-full px-[22px] py-[11px]",
-        link: "text-[#2997ff] underline-offset-4 hover:underline",
+          "bg-[#dc2626] text-white hover:bg-[#b91c1c] rounded-xl px-5 py-2.5 shadow-sm",
+        link: "text-[#2563eb] underline-offset-4 hover:underline",
       },
       size: {
-        default: "text-[17px] leading-none",
+        default: "text-sm",
         xs: "text-xs px-2 py-1 rounded-lg",
-        sm: "text-sm px-3 py-1.5 rounded-full",
-        lg: "text-[17px] px-[28px] py-[14px] rounded-full",
+        sm: "text-xs px-3 py-1.5 rounded-lg",
+        lg: "text-base px-6 py-3 rounded-xl",
         icon: "size-9 rounded-full p-0",
         "icon-sm": "size-8 rounded-full p-0",
         "icon-lg": "size-11 rounded-full p-0",

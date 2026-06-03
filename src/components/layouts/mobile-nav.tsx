@@ -19,7 +19,7 @@ export function MobileNav() {
   if (!session) return null;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-11 bg-[#000000] border-t border-border">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-14 bg-white border-t border-border">
       <div className="flex items-center justify-around h-full">
         {mobileNav.map((item) => {
           const isActive = pathname.startsWith(item.href);
@@ -27,13 +27,14 @@ export function MobileNav() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center justify-center size-11 rounded-lg transition-colors ${
+              className={`flex flex-col items-center justify-center gap-0.5 size-14 transition-colors ${
                 isActive
-                  ? "text-white bg-[rgba(255,255,255,0.06)]"
-                  : "text-[#7a7a7a] hover:text-white"
+                  ? "text-[#2563eb]"
+                  : "text-[#9ca3af] hover:text-[#1a1a1a]"
               }`}
             >
               <item.icon className="size-5" />
+              {isActive && <div className="size-1 rounded-full bg-[#2563eb]" />}
             </Link>
           );
         })}

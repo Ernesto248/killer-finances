@@ -16,6 +16,7 @@ import {
   Shield,
   BarChart3,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import type { UserRole } from "@/types";
 
 const navigation = [
@@ -42,26 +43,31 @@ export function Sidebar() {
     : navigation;
 
   return (
-    <aside className="flex h-screen w-60 flex-col bg-[#000000] border-r border-border">
-      <div className="flex h-11 items-center px-4 border-b border-border">
-        <span className="text-xs text-white font-normal">Finanzas</span>
+    <aside className="flex h-screen w-60 flex-col bg-white border-r border-border">
+      <div className="flex h-14 items-center gap-2 px-5 border-b border-border">
+        <div className="size-2 rounded-full bg-[#2563eb]" />
+        <span className="text-base font-bold text-[#2563eb]">Finanzas</span>
       </div>
       <nav className="flex-1 space-y-0.5 p-2 overflow-y-auto">
         {filteredNav.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          const isDivider = item.name === "Configuracion";
+
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-normal transition-colors ${
-                isActive
-                  ? "text-white bg-[rgba(255,255,255,0.06)]"
-                  : "text-[#7a7a7a] hover:text-white hover:bg-[rgba(255,255,255,0.04)]"
-              }`}
-            >
-              <item.icon className="size-4" />
-              {item.name}
-            </Link>
+            <div key={item.name}>
+              {isDivider && <Separator className="my-2" />}
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-[#eff6ff] text-[#2563eb] font-bold"
+                    : "text-[#6b7280] hover:bg-[#f3f4f6] hover:text-[#1a1a1a]"
+                }`}
+              >
+                <item.icon className="size-4" />
+                {item.name}
+              </Link>
+            </div>
           );
         })}
       </nav>

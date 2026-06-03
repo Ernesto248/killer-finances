@@ -10,12 +10,12 @@ export function Header() {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-40 h-11 bg-[#000000] border-b border-border flex items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-40 h-14 bg-white border-b border-border flex items-center justify-between px-4 md:px-6">
       <div className="flex items-center gap-3">
         <Sheet>
           <SheetTrigger
             render={
-              <Button variant="ghost" size="icon-sm" className="md:hidden text-[#7a7a7a]">
+              <Button variant="ghost" size="icon-sm" className="md:hidden text-[#6b7280]">
                 <Menu className="size-4" />
               </Button>
             }
@@ -24,21 +24,21 @@ export function Header() {
             <Sidebar />
           </SheetContent>
         </Sheet>
-        <span className="text-xs text-white font-normal">Finanzas</span>
+        <span className="text-base font-bold text-[#1a1a1a]">Finanzas</span>
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs text-[#7a7a7a] hidden md:block">
+        <span className="text-sm text-[#6b7280] hidden md:block">
           {session?.user?.name}
         </span>
-        <div className="size-6 rounded-full bg-[#0066cc]/20 flex items-center justify-center text-[11px] font-medium text-[#2997ff]">
+        <div className="flex-shrink-0 size-8 rounded-full bg-[#2563eb]/10 text-[#2563eb] font-bold flex items-center justify-center text-sm">
           {session?.user?.name?.charAt(0) || "U"}
         </div>
         <Button
           variant="ghost"
-          size="xs"
+          size="sm"
           onClick={() => signOut()}
-          className="text-[#7a7a7a] hover:text-white"
+          className="text-[#6b7280] hover:text-[#1a1a1a]"
         >
           Salir
         </Button>
