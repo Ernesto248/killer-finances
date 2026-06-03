@@ -88,45 +88,50 @@ body {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.67 0.19 160);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.67 0.19 160);
-  --chart-2: oklch(0.6 0.18 200);
-  --chart-3: oklch(0.55 0.17 260);
-  --chart-4: oklch(0.5 0.16 40);
-  --chart-5: oklch(0.45 0.15 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.67 0.19 160);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.67 0.19 160);
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #181818;
+  --card-foreground: #ffffff;
+  --popover: #121314;
+  --popover-foreground: #ffffff;
+  --primary: #0070d1;
+  --primary-foreground: #ffffff;
+  --secondary: #121314;
+  --secondary-foreground: #ffffff;
+  --muted: rgba(229, 229, 229, 0.2);
+  --muted-foreground: rgba(229, 229, 229, 0.55);
+  --accent: rgba(0, 112, 209, 0.15);
+  --accent-foreground: #ffffff;
+  --destructive: #c81b3a;
+  --destructive-foreground: #ffffff;
+  --border: rgba(229, 229, 229, 0.2);
+  --input: #181818;
+  --ring: #0070d1;
+  --chart-1: #0070d1;
+  --chart-2: #53b1ff;
+  --chart-3: #d53b00;
+  --chart-4: #deff20;
+  --chart-5: rgba(229, 229, 229, 0.55);
+  --radius: 0.5rem;
+  --sidebar: #000000;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #0070d1;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #121314;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(229, 229, 229, 0.2);
+  --sidebar-ring: #0070d1;
 }
 
 .card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease;
 }
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.ps-gradient-blue {
+  background: linear-gradient(180deg, #121314 0%, #000000 100%);
 }
 
 @layer base {
