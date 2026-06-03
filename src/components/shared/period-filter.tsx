@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export type Period = "today" | "week" | "month" | "quarter" | "custom";
@@ -21,13 +20,10 @@ export function PeriodFilter({ value, onChange, className }: PeriodFilterProps) 
   ];
 
   return (
-    <div className={cn("flex gap-1 bg-muted rounded-lg p-1", className)}>
+    <div className={cn("flex gap-1.5", className)}>
       {periods.map((p) => (
-        <Button
+        <button
           key={p.value}
-          variant={value === p.value ? "default" : "ghost"}
-          size="sm"
-          className="h-7 text-xs"
           onClick={() => {
             const now = new Date();
             let from: Date | undefined;
@@ -38,9 +34,15 @@ export function PeriodFilter({ value, onChange, className }: PeriodFilterProps) 
             else if (p.value === "quarter") from = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
             onChange(p.value, from, to);
           }}
+          className={cn(
+            "text-sm h-8 px-4 rounded-full border transition-colors whitespace-nowrap",
+            value === p.value
+              ? "border-[#0066cc]/40 text-[#0066cc] bg-[#0066cc]/10"
+              : "border-border text-[#7a7a7a] hover:text-white hover:border-white/20"
+          )}
         >
           {p.label}
-        </Button>
+        </button>
       ))}
     </div>
   );

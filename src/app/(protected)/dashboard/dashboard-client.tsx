@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import { PeriodFilter, type Period } from "@/components/shared/period-filter";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DollarSign, Users, Clock, TrendingUp } from "lucide-react";
+import { Users, Clock, TrendingUp, Wallet, Globe } from "lucide-react";
 import { TasaEltoqueCard } from "@/components/dashboard/tasa-eltoque-card";
-import { AnimatedCounter } from "@/components/dashboard/animated-counter";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 
 interface DashboardData {
@@ -44,21 +42,23 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
     }
   };
 
+  const gananciaCupTrend = data.gananciaCup > 0 ? "+" : data.gananciaCup < 0 ? "-" : null;
+  const gananciaUsdTrend = data.gananciaUsd > 0 ? "+" : data.gananciaUsd < 0 ? "-" : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">Resumen general de tus finanzas</p>
-        </div>
+        <h1 className="text-[28px] font-normal leading-snug tracking-[0.012em] text-white">
+          Panel Financiero
+        </h1>
         <PeriodFilter value={period} onChange={(p, from, to) => handlePeriodChange(p, from, to)} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KpiCard title="Balance USD" value={formatCurrency(data.balanceUsd, "USD")} icon={DollarSign} loading={loading} />
-        <KpiCard title="Balance CUP" value={formatCurrency(data.balanceCup, "CUP")} icon={DollarSign} loading={loading} />
-        <KpiCard title="Ganancia CUP" value={formatCurrency(data.gananciaCup, "CUP")} icon={TrendingUp} loading={loading} trend={data.gananciaCup > 0 ? "+" : ""} />
-        <KpiCard title="Ganancia USD" value={formatCurrency(data.gananciaUsd, "USD")} icon={TrendingUp} loading={loading} />
+        <KpiCard title="Balance USD" value={formatCurrency(data.balanceUsd, "USD")} icon={Wallet} loading={loading} />
+        <KpiCard title="Balance CUP" value={formatCurrency(data.balanceCup, "CUP")} icon={Wallet} loading={loading} />
+        <KpiCard title="Ganancia CUP" value={formatCurrency(data.gananciaCup, "CUP")} icon={TrendingUp} loading={loading} trend={gananciaCupTrend} />
+        <KpiCard title="Ganancia USD" value={formatCurrency(data.gananciaUsd, "USD")} icon={TrendingUp} loading={loading} trend={gananciaUsdTrend} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -67,10 +67,19 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-    <Card className="card-hover">
-          <CardHeader><CardTitle className="text-sm">Tasa USD Global</CardTitle></CardHeader>
-          <CardContent><div className="text-3xl font-bold text-primary">{formatNumber(data.tasaGlobal)}</div></CardContent>
-        </Card>
+        <div className="rounded-2xl ring-1 ring-border bg-card p-5">
+          <div className="flex items-start justify-between">
+            <p className="text-sm text-[#7a7a7a]">Tasa USD Global</p>
+            <Globe className="size-4 text-[#7a7a7a]" />
+          </div>
+          <div className="mt-2">
+            {loading ? (
+              <Skeleton className="h-7 w-20" />
+            ) : (
+              <span className="text-2xl font-semibold text-white">{formatNumber(data.tasaGlobal)}</span>
+            )}
+          </div>
+        </div>
         <TasaEltoqueCard />
       </div>
     </div>
@@ -83,24 +92,26 @@ interface KpiCardProps {
   subtitle?: string;
   icon: React.ComponentType<{ className?: string }>;
   loading: boolean;
-  trend?: string;
+  trend?: string | null;
 }
 
 function KpiCard({ title, value, subtitle, icon: Icon, loading, trend }: KpiCardProps) {
+  const valueColor = trend === "+" ? "text-[#30d158]" : trend === "-" ? "text-[#ff453a]" : "text-white";
+
   return (
-        <Card className="card-hover">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
+    <div className="rounded-2xl ring-1 ring-border bg-card p-5">
+      <div className="flex items-start justify-between">
+        <p className="text-sm text-[#7a7a7a]">{title}</p>
+        <Icon className="size-4 text-[#7a7a7a]" />
+      </div>
+      <div className="mt-2">
         {loading ? (
-          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-7 w-20" />
         ) : (
-          <div className={`text-2xl font-bold ${trend === "+" ? "text-emerald-400" : ""}`}><AnimatedCounter value={value} /></div>
+          <span className={`text-2xl font-semibold ${valueColor}`}>{value}</span>
         )}
-        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
-      </CardContent>
-    </Card>
+        {subtitle && <p className="text-sm text-[#7a7a7a] mt-1">{subtitle}</p>}
+      </div>
+    </div>
   );
 }

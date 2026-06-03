@@ -19,22 +19,21 @@ export function MobileNav() {
   if (!session) return null;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card">
-      <div className="flex items-center justify-around h-16">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-11 bg-[#000000] border-t border-border">
+      <div className="flex items-center justify-around h-full">
         {mobileNav.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center gap-1 px-2 py-1 text-xs font-medium transition-colors ${
+              className={`flex items-center justify-center size-11 rounded-lg transition-colors ${
                 isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-white bg-[rgba(255,255,255,0.06)]"
+                  : "text-[#7a7a7a] hover:text-white"
               }`}
             >
-              <item.icon className="h-5 w-5" />
-              {item.name}
+              <item.icon className="size-5" />
             </Link>
           );
         })}

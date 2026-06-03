@@ -163,7 +163,7 @@ export function CuentaTable({ cuentas: initialCuentas, userRole }: CuentaTablePr
       <div className="grid grid-cols-2 gap-4">
         <div className="rounded-lg border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total USD</p>
-          <p className="text-2xl font-bold font-mono text-green-600">
+          <p className="text-2xl font-bold font-mono text-[#30d158]">
             {formatCurrency(totalUsd, "USD")}
           </p>
         </div>
@@ -226,7 +226,7 @@ export function CuentaTable({ cuentas: initialCuentas, userRole }: CuentaTablePr
                   <TableCell>
                     <Badge
                       variant={c.moneda === "USD" ? "default" : "secondary"}
-                      className={c.moneda === "USD" ? "bg-green-600 hover:bg-green-600/80" : ""}
+                      className={c.moneda === "USD" ? "bg-[#30d158] hover:bg-[#30d158]/80" : ""}
                     >
                       {monedaLabels[c.moneda]}
                     </Badge>

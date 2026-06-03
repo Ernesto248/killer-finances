@@ -152,7 +152,7 @@ export default async function WireDetailPage({ params }: PageProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold font-mono text-green-600">
+            <div className="text-2xl font-bold font-mono text-[#30d158]">
               {formatCurrency(pagado, "CUP")}
             </div>
           </CardContent>
@@ -178,7 +178,7 @@ export default async function WireDetailPage({ params }: PageProps) {
           <CardContent>
             <div
               className={`text-2xl font-bold font-mono ${
-                num(wire.gananciaCup) >= 0 ? "text-green-600" : "text-destructive"
+                num(wire.gananciaCup) >= 0 ? "text-[#30d158]" : "text-destructive"
               }`}
             >
               {formatCurrency(num(wire.gananciaCup), "CUP")}

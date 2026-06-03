@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatNumber } from "@/lib/utils";
 import { TrendingUp } from "lucide-react";
 
@@ -23,23 +21,21 @@ export function TasaEltoqueCard() {
   }, []);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Tasa elTOQUE (Referencia)</CardTitle>
-        <TrendingUp className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
+    <div className="rounded-2xl ring-1 ring-border bg-card p-5">
+      <div className="flex items-start justify-between">
+        <p className="text-sm text-[#7a7a7a]">Tasa elTOQUE (Referencia)</p>
+        <TrendingUp className="size-4 text-[#7a7a7a]" />
+      </div>
+      <div className="mt-2">
         {loading ? (
-          <Skeleton className="h-8 w-24" />
+          <span className="text-2xl font-semibold text-[#7a7a7a]">...</span>
         ) : error ? (
-          <div className="text-2xl font-bold text-muted-foreground">—</div>
+          <span className="text-2xl font-semibold text-[#7a7a7a]">&mdash;</span>
         ) : (
-          <div className="text-3xl font-bold text-emerald-400">
-            {formatNumber(tasa!)} CUP
-          </div>
+          <span className="text-2xl font-semibold text-white">{formatNumber(tasa!)} CUP</span>
         )}
-        <p className="text-xs text-muted-foreground mt-1">Tasa informal del mercado</p>
-      </CardContent>
-    </Card>
+        <p className="text-sm text-[#7a7a7a] mt-1">Tasa informal del mercado</p>
+      </div>
+    </div>
   );
 }

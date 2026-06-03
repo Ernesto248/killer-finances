@@ -201,7 +201,7 @@ export function WireTable() {
                     <TableCell className="text-right font-mono">
                       {formatCurrency(total, "CUP")}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-green-600">
+                    <TableCell className="text-right font-mono text-[#30d158]">
                       {formatCurrency(pagado, "CUP")}
                     </TableCell>
                     <TableCell className="text-right font-mono text-destructive">

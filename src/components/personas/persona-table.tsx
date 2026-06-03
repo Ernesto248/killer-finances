@@ -244,7 +244,7 @@ export function PersonaTable() {
                   <TableCell
                     className={`text-right font-mono ${
                       toNumber(p.balanceUsd) >= 0
-                        ? "text-green-600"
+                        ? "text-[#30d158]"
                         : "text-destructive"
                     }`}
                   >
@@ -253,7 +253,7 @@ export function PersonaTable() {
                   <TableCell
                     className={`text-right font-mono ${
                       toNumber(p.balanceCup) >= 0
-                        ? "text-green-600"
+                        ? "text-[#30d158]"
                         : "text-destructive"
                     }`}
                   >

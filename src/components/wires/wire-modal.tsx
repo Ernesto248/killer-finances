@@ -274,7 +274,7 @@ export function WireModal({
                   <span
                     className={`font-mono font-bold ${
                       estimatedGanancia >= 0
-                        ? "text-green-600"
+                        ? "text-[#30d158]"
                         : "text-destructive"
                     }`}
                   >

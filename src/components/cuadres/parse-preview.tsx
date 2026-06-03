@@ -30,7 +30,7 @@ export function ParsePreview({ parsed }: ParsePreviewProps) {
             {formatCurrency(parsed.deudaInicialCup, "CUP")}
           </div>
         </div>
-        <div className="rounded-md bg-red-50 p-2 dark:bg-red-950/20">
+        <div className="rounded-md bg-[#ff453a]/10 p-2">
           <div className="text-xs text-muted-foreground">Pagado</div>
           <div className="font-mono font-medium text-destructive">
             {formatCurrency(parsed.pagadoCup, "CUP")}

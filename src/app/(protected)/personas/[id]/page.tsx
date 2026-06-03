@@ -98,7 +98,7 @@ export default async function PersonaDetailPage({ params }: PageProps) {
             <div
               className={`text-2xl font-bold font-mono ${
                 num(persona.balanceUsd) >= 0
-                  ? "text-green-600"
+                  ? "text-[#30d158]"
                   : "text-destructive"
               }`}
             >
@@ -116,7 +116,7 @@ export default async function PersonaDetailPage({ params }: PageProps) {
             <div
               className={`text-2xl font-bold font-mono ${
                 num(persona.balanceCup) >= 0
-                  ? "text-green-600"
+                  ? "text-[#30d158]"
                   : "text-destructive"
               }`}
             >

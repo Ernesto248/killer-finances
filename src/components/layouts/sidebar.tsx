@@ -42,24 +42,24 @@ export function Sidebar() {
     : navigation;
 
   return (
-    <aside className="hidden md:flex h-screen w-64 flex-col border-r border-border bg-card">
-      <div className="flex h-14 items-center border-b border-border px-6">
-        <h1 className="text-base font-semibold text-foreground tracking-tight">Finanzas</h1>
+    <aside className="flex h-screen w-60 flex-col bg-[#000000] border-r border-border">
+      <div className="flex h-11 items-center px-4 border-b border-border">
+        <span className="text-xs text-white font-normal">Finanzas</span>
       </div>
-      <nav className="flex-1 space-y-0.5 p-3 overflow-y-auto">
+      <nav className="flex-1 space-y-0.5 p-2 overflow-y-auto">
         {filteredNav.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-normal transition-colors ${
                 isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  ? "text-white bg-[rgba(255,255,255,0.06)]"
+                  : "text-[#7a7a7a] hover:text-white hover:bg-[rgba(255,255,255,0.04)]"
               }`}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="size-4" />
               {item.name}
             </Link>
           );

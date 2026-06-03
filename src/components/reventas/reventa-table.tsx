@@ -200,7 +200,7 @@ export function ReventaTable() {
                     <TableCell
                       className={`text-right font-mono ${
                         toNumber(r.gananciaCup) >= 0
-                          ? "text-green-600"
+                          ? "text-[#30d158]"
                           : "text-destructive"
                       }`}
                     >

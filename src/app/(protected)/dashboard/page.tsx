@@ -1,7 +1,6 @@
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DashboardClient } from "./dashboard-client";
-import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +25,6 @@ export default async function DashboardPage() {
   ]);
 
   return (
-    <PageTransition>
     <DashboardClient
       initialData={{
         balanceUsd: Number(cuentasUsd._sum.saldoActual ?? 0),
@@ -40,6 +38,5 @@ export default async function DashboardPage() {
         tasaGlobal: Number(config?.tasaUsdGlobal ?? 600),
       }}
     />
-    </PageTransition>
   );
 }
