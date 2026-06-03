@@ -143,12 +143,6 @@ export function CuadreTable() {
               </div>
             ))
           )}
-        {userCanEdit && (
-          <FAB
-            onClick={() => setModalOpen(true)}
-            label="Nuevo"
-          />
-        )}
       </div>
 
       {/* DESKTOP: Table view */}
