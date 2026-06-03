@@ -4,6 +4,14 @@ import { DashboardClient } from "./dashboard-client";
 
 export const dynamic = "force-dynamic";
 
+function sum(arr: { saldoActual: any }[]): number {
+  return arr.reduce((s, r) => s + Number(r.saldoActual), 0);
+}
+
+function sumG(arr: { gananciaCup: any }[]): number {
+  return arr.reduce((s, r) => s + Number(r.gananciaCup), 0);
+}
+
 export default async function DashboardPage() {
   await requireAuth();
 
@@ -12,11 +20,11 @@ export default async function DashboardPage() {
   const dateFilter = { gte: startOfMonth, lte: now };
 
   const [
-    balanceBancosUsd,
-    balanceEfectivoUsd,
-    balanceBancosCup,
-    balanceEfectivoCup,
-    gananciaCupWires,
+    balanceBancosUsdData,
+    balanceEfectivoUsdData,
+    balanceBancosCupData,
+    balanceEfectivoCupData,
+    gananciaCupWiresData,
     gananciaCupReventasData,
     remeserosActivos,
     totalRemeseros,
@@ -24,11 +32,11 @@ export default async function DashboardPage() {
     config,
     lineasCuadre,
   ] = await Promise.all([
-    prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: { in: ["ZELLE", "BANCO"] } }, _sum: { saldoActual: true } }),
-    prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: "EFECTIVO" }, _sum: { saldoActual: true } }),
-    prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP", tipo: { in: ["ZELLE", "BANCO"] } }, _sum: { saldoActual: true } }),
-    prisma.cuentaBancaria.aggregate({ where: { moneda: "CUP", tipo: "EFECTIVO" }, _sum: { saldoActual: true } }),
-    prisma.wire.aggregate({ where: { fecha: dateFilter }, _sum: { gananciaCup: true } }),
+    prisma.cuentaBancaria.findMany({ where: { moneda: "USD", tipo: { in: ["ZELLE", "BANCO"] } }, select: { saldoActual: true } }),
+    prisma.cuentaBancaria.findMany({ where: { moneda: "USD", tipo: "EFECTIVO" }, select: { saldoActual: true } }),
+    prisma.cuentaBancaria.findMany({ where: { moneda: "CUP", tipo: { in: ["ZELLE", "BANCO"] } }, select: { saldoActual: true } }),
+    prisma.cuentaBancaria.findMany({ where: { moneda: "CUP", tipo: "EFECTIVO" }, select: { saldoActual: true } }),
+    prisma.wire.findMany({ where: { fecha: dateFilter }, select: { gananciaCup: true } }),
     prisma.reventaWire.findMany({ where: { fecha: dateFilter }, select: { gananciaCup: true } }),
     prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }),
     prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }),
@@ -37,7 +45,6 @@ export default async function DashboardPage() {
     prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } }),
   ]);
 
-  // Calculate weighted average acquisition rate
   let tasaAdquisicion = 0;
   let totalUsdCuadres = 0;
   for (const l of lineasCuadre) {
@@ -48,16 +55,22 @@ export default async function DashboardPage() {
   }
   tasaAdquisicion = totalUsdCuadres > 0 ? Math.round(tasaAdquisicion / totalUsdCuadres) : 0;
 
+  const balanceBancosUsd = sum(balanceBancosUsdData);
+  const balanceEfectivoUsd = sum(balanceEfectivoUsdData);
+  const balanceBancosCup = sum(balanceBancosCupData);
+  const balanceEfectivoCup = sum(balanceEfectivoCupData);
+  const gananciaCup = sumG(gananciaCupWiresData) + sumG(gananciaCupReventasData);
+
   return (
     <DashboardClient
       initialData={{
-        balanceBancosUsd: Number(balanceBancosUsd._sum.saldoActual ?? 0),
-        balanceEfectivoUsd: Number(balanceEfectivoUsd._sum.saldoActual ?? 0),
-        balanceBancosCup: Number(balanceBancosCup._sum.saldoActual ?? 0),
-        balanceEfectivoCup: Number(balanceEfectivoCup._sum.saldoActual ?? 0),
-        balanceUsd: Number(balanceBancosUsd._sum.saldoActual ?? 0) + Number(balanceEfectivoUsd._sum.saldoActual ?? 0),
-        balanceCup: Number(balanceBancosCup._sum.saldoActual ?? 0) + Number(balanceEfectivoCup._sum.saldoActual ?? 0),
-        gananciaCup: Number(gananciaCupWires._sum.gananciaCup ?? 0) + gananciaCupReventasData.reduce((s, r) => s + Number(r.gananciaCup), 0),
+        balanceBancosUsd,
+        balanceEfectivoUsd,
+        balanceBancosCup,
+        balanceEfectivoCup,
+        balanceUsd: balanceBancosUsd + balanceEfectivoUsd,
+        balanceCup: balanceBancosCup + balanceEfectivoCup,
+        gananciaCup,
         remeserosActivos,
         totalRemeseros,
         wiresPendientesCount: wiresPendientes.length,

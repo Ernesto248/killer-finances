@@ -50,11 +50,13 @@ export async function PUT(
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
 
-    const tasaPromedioRemeseros = await prisma.cuadre.aggregate({
-      _avg: { tasaPromedioCup: true },
+    const cuadres = await prisma.cuadre.findMany({
+      select: { tasaPromedioCup: true },
+      where: { tasaPromedioCup: { gt: 0 } },
     });
-    const tasaPromedio =
-      Number(tasaPromedioRemeseros._avg.tasaPromedioCup ?? 0);
+    const tasaPromedio = cuadres.length > 0
+      ? cuadres.reduce((s, c) => s + Number(c.tasaPromedioCup), 0) / cuadres.length
+      : 0;
 
     const montoCupTotal = Math.round(data.montoUsd * data.tasaPactada);
     const gananciaCup = Math.round(data.montoUsd * (data.tasaPactada - tasaPromedio));
