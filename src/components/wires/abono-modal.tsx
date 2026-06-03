@@ -46,7 +46,7 @@ export function AbonoModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<AbonoWireFormData>({
-    resolver: zodResolver(abonoWireSchema) as never,
+    resolver: zodResolver(abonoWireSchema),
     defaultValues: {
       monto: 0,
       moneda: "CUP",

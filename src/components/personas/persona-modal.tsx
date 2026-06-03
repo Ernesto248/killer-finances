@@ -54,7 +54,7 @@ export function PersonaModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<PersonaFormData>({
-    resolver: zodResolver(personaSchema) as never,
+    resolver: zodResolver(personaSchema),
     defaultValues: {
       nombre: "",
       telefono: "",

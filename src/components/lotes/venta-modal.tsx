@@ -64,7 +64,7 @@ export function VentaModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<LoteVentaFormData>({
-    resolver: zodResolver(loteVentaSchema) as never,
+    resolver: zodResolver(loteVentaSchema),
     defaultValues: {
       cantidad: 0,
       precioUnitario: 0,

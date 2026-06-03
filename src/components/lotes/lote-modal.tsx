@@ -46,7 +46,7 @@ export function LoteModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<LoteFormData>({
-    resolver: zodResolver(loteSchema) as never,
+    resolver: zodResolver(loteSchema),
     defaultValues: {
       nombre: "",
       costoTotal: 0,

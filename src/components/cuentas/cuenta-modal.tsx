@@ -60,7 +60,7 @@ export function CuentaModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CuentaBancariaFormData>({
-    resolver: zodResolver(cuentaBancariaSchema) as never,
+    resolver: zodResolver(cuentaBancariaSchema),
     defaultValues: {
       nombre: "",
       tipo: "ZELLE",

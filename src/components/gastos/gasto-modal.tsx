@@ -60,7 +60,7 @@ export function GastoModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<GastoFormData>({
-    resolver: zodResolver(gastoSchema) as never,
+    resolver: zodResolver(gastoSchema),
     defaultValues: {
       monto: 0,
       moneda: "CUP",

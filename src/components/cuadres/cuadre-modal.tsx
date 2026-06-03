@@ -66,7 +66,7 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
     reset,
     formState: { errors },
   } = useForm<CuadreFormData>({
-    resolver: zodResolver(cuadreSchema) as never,
+    resolver: zodResolver(cuadreSchema),
     defaultValues: {
       personaId: "",
       nota: "",

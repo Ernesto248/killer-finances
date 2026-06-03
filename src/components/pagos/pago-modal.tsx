@@ -58,7 +58,7 @@ export function PagoModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<PagoFormData>({
-    resolver: zodResolver(pagoSchema) as never,
+    resolver: zodResolver(pagoSchema),
     defaultValues: {
       personaId: "",
       monto: 0,

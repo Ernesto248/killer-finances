@@ -57,7 +57,7 @@ export function ReventaModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ReventaWireFormData>({
-    resolver: zodResolver(reventaWireSchema) as never,
+    resolver: zodResolver(reventaWireSchema),
     defaultValues: {
       compradorId: "",
       vendedorId: "",

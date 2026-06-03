@@ -63,7 +63,7 @@ export function WireModal({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<WireFormData>({
-    resolver: zodResolver(wireSchema) as never,
+    resolver: zodResolver(wireSchema),
     defaultValues: {
       compradorId: "",
       montoUsd: 0,
