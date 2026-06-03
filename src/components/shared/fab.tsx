@@ -11,7 +11,7 @@ export function FAB({ onClick, label = "Nuevo" }: { onClick: () => void; label?:
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       whileTap={{ scale: 0.9 }}
       onClick={onClick}
-      className="fixed bottom-20 right-5 z-40 md:hidden flex items-center gap-2 bg-[#2563eb] text-white rounded-2xl px-5 h-14 shadow-lg hover:[bg-#1d4ed8] transition-colors"
+      className="fixed bottom-24 right-5 z-[60] md:hidden flex items-center gap-2 bg-[#2563eb] text-white rounded-2xl px-5 h-14 shadow-lg hover:bg-[#1d4ed8] transition-colors"
     >
       <Plus className="size-5" />
       <span className="text-sm font-medium">{label}</span>
