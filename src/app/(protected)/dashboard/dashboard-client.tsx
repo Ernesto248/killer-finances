@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { PeriodFilter, type Period } from "@/components/shared/period-filter";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, Clock, TrendingUp, Wallet, Globe } from "lucide-react";
+import { Users, Clock, TrendingUp, Wallet, Globe, DollarSign } from "lucide-react";
 import { TasaEltoqueCard } from "@/components/dashboard/tasa-eltoque-card";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 
@@ -20,6 +20,7 @@ interface DashboardData {
   wiresPendientesCount: number;
   wiresPendientesUsd: number;
   tasaGlobal: number;
+  tasaAdquisicion: number;
 }
 
 export function DashboardClient({ initialData }: { initialData: DashboardData }) {
@@ -77,7 +78,17 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
       <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
         <KpiCard title="Ganancia CUP" value={formatCurrency(data.gananciaCup, "CUP")} icon={TrendingUp} loading={loading} trend={gananciaCupTrend} />
         <KpiCard title="Wires Pend." value={`${data.wiresPendientesCount}`} subtitle={`${formatCurrency(data.wiresPendientesUsd, "USD")} x cobrar`} icon={Clock} loading={loading} />
-        <KpiCard title="Remeseros Activos" value={`${data.remeserosActivos} / ${data.totalRemeseros}`} icon={Users} loading={loading} />
+        <KpiCard title="Remeseros" value={`${data.remeserosActivos}/${data.totalRemeseros}`} icon={Users} loading={loading} subtitle="activos/total" />
+        <KpiCard
+          title="Tasa Adquisicion"
+          value={`${data.tasaAdquisicion} CUP`}
+          icon={DollarSign}
+          loading={loading}
+          subtitle="Promedio ponderado"
+        />
+      </div>
+
+      <div className="grid gap-3 md:gap-4 grid-cols-2">
         <div className="rounded-xl ring-1 ring-border bg-white p-3 md:p-5">
           <div className="flex items-start justify-between">
             <p className="text-xs uppercase font-bold text-[#6b7280] tracking-wider">Tasa USD Global</p>
@@ -106,9 +117,6 @@ export function DashboardClient({ initialData }: { initialData: DashboardData })
             )}
           </div>
         </div>
-      </div>
-
-      <div>
         <TasaEltoqueCard />
       </div>
     </div>

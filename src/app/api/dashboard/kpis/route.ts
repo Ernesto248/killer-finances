@@ -35,6 +35,18 @@ export async function GET(req: NextRequest) {
 
     const config = await prisma.configuracion.findUnique({ where: { id: "global" } });
 
+    // Calculate tasa de adquisicion (weighted average from all cuadre lineas)
+    const lineasCuadre = await prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } });
+    let tasaAdquisicion = 0;
+    let totalUsdCuadres = 0;
+    for (const l of lineasCuadre) {
+      const monto = Number(l.montoUsd);
+      const tasa = Number(l.tasa);
+      tasaAdquisicion += monto * tasa;
+      totalUsdCuadres += monto;
+    }
+    tasaAdquisicion = totalUsdCuadres > 0 ? Math.round(tasaAdquisicion / totalUsdCuadres) : 0;
+
     return NextResponse.json({
       balanceBancosUsd: Number(balanceBancosUsd._sum.saldoActual ?? 0),
       balanceEfectivoUsd: Number(balanceEfectivoUsd._sum.saldoActual ?? 0),
@@ -49,6 +61,7 @@ export async function GET(req: NextRequest) {
       wiresPendientes: wiresPendientes.length,
       wiresPendientesUsd: wiresPendientes.reduce((s, w) => s + Number(w.montoUsd), 0),
       tasaGlobal: Number(config?.tasaUsdGlobal ?? 600),
+      tasaAdquisicion,
     });
   } catch (error: unknown) {
     const err = error as Error;

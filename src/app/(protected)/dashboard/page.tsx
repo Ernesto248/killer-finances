@@ -22,6 +22,7 @@ export default async function DashboardPage() {
     totalRemeseros,
     wiresPendientes,
     config,
+    lineasCuadre,
   ] = await Promise.all([
     prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: { in: ["ZELLE", "BANCO"] } }, _sum: { saldoActual: true } }),
     prisma.cuentaBancaria.aggregate({ where: { moneda: "USD", tipo: "EFECTIVO" }, _sum: { saldoActual: true } }),
@@ -33,7 +34,19 @@ export default async function DashboardPage() {
     prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }),
     prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } }),
     prisma.configuracion.findUnique({ where: { id: "global" } }),
+    prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } }),
   ]);
+
+  // Calculate weighted average acquisition rate
+  let tasaAdquisicion = 0;
+  let totalUsdCuadres = 0;
+  for (const l of lineasCuadre) {
+    const monto = Number(l.montoUsd);
+    const tasa = Number(l.tasa);
+    tasaAdquisicion += monto * tasa;
+    totalUsdCuadres += monto;
+  }
+  tasaAdquisicion = totalUsdCuadres > 0 ? Math.round(tasaAdquisicion / totalUsdCuadres) : 0;
 
   return (
     <DashboardClient
@@ -50,6 +63,7 @@ export default async function DashboardPage() {
         wiresPendientesCount: wiresPendientes.length,
         wiresPendientesUsd: wiresPendientes.reduce((s, w) => s + Number(w.montoUsd), 0),
         tasaGlobal: Number(config?.tasaUsdGlobal ?? 600),
+        tasaAdquisicion,
       }}
     />
   );
