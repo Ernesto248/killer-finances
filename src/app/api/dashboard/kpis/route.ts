@@ -5,31 +5,26 @@ import { requireRole } from "@/lib/auth";
 export async function GET(req: NextRequest) {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const { searchParams } = new URL(req.url);
-    const from = searchParams.get("from");
-    const to = searchParams.get("to");
 
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.gte = new Date(from);
-    if (to) dateFilter.lte = new Date(to);
-    const hasFilter = from || to;
+    const cuentas = await prisma.$queryRawUnsafe<Array<{ moneda: string; tipo: string; saldo_actual: number }>>(
+      `SELECT moneda, tipo, saldo_actual FROM cuentas_bancarias`
+    );
 
-    const wiresWhere = hasFilter ? { fecha: dateFilter } : {};
-    const reventasWhere = hasFilter ? { fecha: dateFilter } : {};
+    const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldo_actual), 0);
+    const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldo_actual), 0);
+    const balanceBancosCup = cuentas.filter(c => c.moneda === "CUP" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldo_actual), 0);
+    const balanceEfectivoCup = cuentas.filter(c => c.moneda === "CUP" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldo_actual), 0);
 
-    const cuentas = await prisma.cuentaBancaria.findMany();
-    const wiresGanancia = await prisma.wire.findMany({ select: { gananciaCup: true }, where: wiresWhere });
-    const reventasGanancia = await prisma.reventaWire.findMany({ select: { gananciaCup: true }, where: reventasWhere });
-    const totalRemeseros = await prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } });
-    const remeserosActivos = await prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } });
-    const wiresPendientes = await prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } });
-    const config = await prisma.configuracion.findUnique({ where: { id: "global" } });
-    const lineasCuadre = await prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } });
-
-    const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
-    const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
-    const balanceBancosCup = cuentas.filter(c => c.moneda === "CUP" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
-    const balanceEfectivoCup = cuentas.filter(c => c.moneda === "CUP" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
+    const [wiresGanancia, reventasGanancia, totalRemeseros, remeserosActivos, wiresPendientes, config, lineasCuadre] =
+      await Promise.all([
+        prisma.wire.findMany({ select: { gananciaCup: true } }),
+        prisma.reventaWire.findMany({ select: { gananciaCup: true } }),
+        prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }),
+        prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }),
+        prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } }),
+        prisma.configuracion.findUnique({ where: { id: "global" } }),
+        prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } }),
+      ]);
 
     let tasaAdquisicion = 0;
     let totalUsdCuadres = 0;
