@@ -217,12 +217,12 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false} className="sm:max-w-lg">
+      <DialogContent showCloseButton={false} className="sm:max-w-xl max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Nuevo Cuadre</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto flex-1 pr-1">
           {!manualMode ? (
             <div className="space-y-3">
               <div className="space-y-2">
@@ -260,7 +260,9 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Seleccionar persona..." />
+                        <SelectValue>
+                          {field.value && personas.find(p => p.id === field.value)?.nombre || "Seleccionar persona..."}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {personas.map((p) => (
