@@ -19,21 +19,17 @@ export async function DELETE(
     }
 
     const totalZelle = Number(cuadre.totalZelleUsd);
-    const cupChange = Number(cuadre.deudaFinalCup) - Number(cuadre.deudaInicialCup) + Number(cuadre.pagadoCup);
 
-    // Use raw SQL for balance revert (Prisma 7 decrement broken on Decimal)
-    const personaActual = await prisma.$queryRawUnsafe<Array<{ balance_cup: number; balance_usd: number }>>(
-      `SELECT balance_cup, balance_usd FROM personas WHERE id = $1`,
+    // Revert: balanceCup = deudaInicialCup, balanceUsd = accumulated - this cuadre's Zelle
+    const personaActual = await prisma.$queryRawUnsafe<Array<{ balance_usd: number }>>(
+      `SELECT balance_usd FROM personas WHERE id = $1`,
       cuadre.personaId
     );
-    if (personaActual.length > 0) {
-      const newCup = Number(personaActual[0].balance_cup) - cupChange;
-      const newUsd = Number(personaActual[0].balance_usd) - totalZelle;
-      await prisma.$executeRawUnsafe(
-        `UPDATE personas SET balance_cup = $1, balance_usd = $2 WHERE id = $3`,
-        newCup, newUsd, cuadre.personaId
-      );
-    }
+    const newUsd = (personaActual.length > 0 ? Number(personaActual[0].balance_usd) : 0) - totalZelle;
+    await prisma.$executeRawUnsafe(
+      `UPDATE personas SET balance_cup = $1, balance_usd = $2 WHERE id = $3`,
+      cuadre.deudaInicialCup, Math.max(0, newUsd), cuadre.personaId
+    );
 
     await prisma.$transaction([
       prisma.lineaCuadre.deleteMany({ where: { cuadreId: cuadre.id } }),

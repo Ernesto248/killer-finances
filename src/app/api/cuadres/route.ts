@@ -59,23 +59,19 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      const cupChange =
-        data.deudaFinalCup - data.deudaInicialCup + data.pagadoCup;
       const usdChange = data.totalZelleUsd;
 
-      // Use raw SQL for balance update (Prisma 7 increment broken on Decimal)
-      const personaActual = await tx.$queryRawUnsafe<Array<{ balance_cup: number; balance_usd: number }>>(
-        `SELECT balance_cup, balance_usd FROM personas WHERE id = $1`,
+      // Use raw SQL: balanceCup = deudaFinalCup (absolute, not increment)
+      // balanceUsd = accumulated (each cuadre adds new Zelle)
+      const personaActual = await tx.$queryRawUnsafe<Array<{ balance_usd: number }>>(
+        `SELECT balance_usd FROM personas WHERE id = $1`,
         data.personaId
       );
-      if (personaActual.length > 0) {
-        const newCup = Number(personaActual[0].balance_cup) + cupChange;
-        const newUsd = Number(personaActual[0].balance_usd) + usdChange;
-        await tx.$executeRawUnsafe(
-          `UPDATE personas SET balance_cup = $1, balance_usd = $2 WHERE id = $3`,
-          newCup, newUsd, data.personaId
-        );
-      }
+      const newUsd = (personaActual.length > 0 ? Number(personaActual[0].balance_usd) : 0) + usdChange;
+      await tx.$executeRawUnsafe(
+        `UPDATE personas SET balance_cup = $1, balance_usd = $2 WHERE id = $3`,
+        data.deudaFinalCup, newUsd, data.personaId
+      );
 
       return { cuadre, personaId: data.personaId };
     });
