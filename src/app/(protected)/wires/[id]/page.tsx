@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { WireDetailClient } from "./wire-detail-client";
 import { PageTransition } from "@/components/shared/page-transition";
@@ -80,13 +79,9 @@ export default async function WireDetailPage({ params }: PageProps) {
     <PageTransition>
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          render={<Link href="/wires" />}
-        >
+        <Link href="/wires" className="inline-flex items-center justify-center size-8 rounded-full hover:bg-[#f3f4f6] transition-colors">
           <ArrowLeft className="size-4" />
-        </Button>
+        </Link>
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold tracking-tight">
