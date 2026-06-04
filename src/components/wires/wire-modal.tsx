@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { wireSchema, type WireFormData } from "@/lib/validations";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, formatInputNumber } from "@/lib/utils";
 
 interface PersonaOption {
   id: string;
@@ -192,12 +192,22 @@ export function WireModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="montoUsd">Monto USD</Label>
-              <Input
-                id="montoUsd"
-                type="text"
-                inputMode="decimal"
-                pattern="[0-9]*[.]?[0-9]*"
-                {...register("montoUsd")}
+              <Controller
+                name="montoUsd"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="montoUsd"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0"
+                    value={field.value ? formatInputNumber(field.value) : ""}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/,/g, "");
+                      field.onChange(raw);
+                    }}
+                  />
+                )}
               />
               {errors.montoUsd && (
                 <p className="text-sm text-destructive">
@@ -207,12 +217,22 @@ export function WireModal({
             </div>
             <div className="space-y-2">
               <Label htmlFor="tasaPactada">Tasa Pactada</Label>
-              <Input
-                id="tasaPactada"
-                type="text"
-                inputMode="decimal"
-                pattern="[0-9]*[.]?[0-9]*"
-                {...register("tasaPactada")}
+              <Controller
+                name="tasaPactada"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="tasaPactada"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0"
+                    value={field.value ? formatInputNumber(field.value) : ""}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/,/g, "");
+                      field.onChange(raw);
+                    }}
+                  />
+                )}
               />
               {errors.tasaPactada && (
                 <p className="text-sm text-destructive">
