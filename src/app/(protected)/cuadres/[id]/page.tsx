@@ -18,8 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { CuadreRevertButton } from "./cuadre-revert-button";
 import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
@@ -53,35 +53,24 @@ export default async function CuadreDetailPage({ params }: PageProps) {
   return (
     <PageTransition>
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          render={<Link href="/cuadres" />}
-        >
-          <ArrowLeft className="size-4" />
-        </Button>
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold tracking-tight">
-              Cuadre{" "}
-              {new Date(cuadre.fecha).toLocaleDateString("es-CU", {
-                dateStyle: "medium",
-              })}
-            </h2>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/cuadres" className="inline-flex items-center justify-center size-8 rounded-full hover:bg-[#f3f4f6] transition-colors">
+            <ArrowLeft className="size-4" />
+          </Link>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-bold">Cuadre {new Date(cuadre.fecha).toLocaleDateString("es-CU")}</h2>
+            </div>
+            <p className="text-sm text-[#6b7280]">
+              <Link href={`/personas/${cuadre.persona.id}`} className="hover:underline">
+                {cuadre.persona.nombre}
+              </Link>
+              {cuadre.nota && <span className="ml-2"> — {cuadre.nota}</span>}
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            <Link
-              href={`/personas/${cuadre.persona.id}`}
-              className="hover:underline"
-            >
-              {cuadre.persona.nombre}
-            </Link>
-            {cuadre.nota && (
-              <span className="ml-2"> &mdash; {cuadre.nota}</span>
-            )}
-          </p>
         </div>
+        <CuadreRevertButton cuadreId={cuadre.id} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

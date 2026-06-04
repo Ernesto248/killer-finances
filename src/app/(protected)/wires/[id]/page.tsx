@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ArrowLeft } from "lucide-react";
 import { WireDetailClient } from "./wire-detail-client";
+import { WireRevertButtons } from "./wire-revert-buttons";
 import { PageTransition } from "@/components/shared/page-transition";
 
 export const dynamic = "force-dynamic";
@@ -36,21 +37,24 @@ export default async function WireDetailPage({ params }: { params: { id: string 
   return (
     <PageTransition>
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Link href="/wires" className="inline-flex items-center justify-center size-8 rounded-full hover:bg-[#f3f4f6] transition-colors">
-            <ArrowLeft className="size-4" />
-          </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-bold">
-                Wire {new Date(wire.fecha).toLocaleDateString("es-CU")}
-              </h2>
-              <Badge variant={estadoVariant as any}>{wire.estado}</Badge>
-            </div>
-            <Link href={`/personas/${wire.comprador.id}`} className="text-sm text-[#6b7280] hover:underline">
-              {wire.comprador.nombre}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/wires" className="inline-flex items-center justify-center size-8 rounded-full hover:bg-[#f3f4f6] transition-colors">
+              <ArrowLeft className="size-4" />
             </Link>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold">
+                  Wire {new Date(wire.fecha).toLocaleDateString("es-CU")}
+                </h2>
+                <Badge variant={estadoVariant as any}>{wire.estado}</Badge>
+              </div>
+              <Link href={`/personas/${wire.comprador.id}`} className="text-sm text-[#6b7280] hover:underline">
+                {wire.comprador.nombre}
+              </Link>
+            </div>
           </div>
+          <WireRevertButtons wireId={wire.id} redirectUrl="/wires" />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
@@ -112,6 +116,7 @@ export default async function WireDetailPage({ params }: { params: { id: string 
                     <TableHead>Fecha</TableHead>
                     <TableHead className="text-right">Monto</TableHead>
                     <TableHead>Moneda</TableHead>
+                    <TableHead className="w-[60px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -120,6 +125,9 @@ export default async function WireDetailPage({ params }: { params: { id: string 
                       <TableCell className="text-sm">{new Date(a.fecha).toLocaleDateString("es-CU")}</TableCell>
                       <TableCell className="text-right font-semibold">{formatCurrency(Number(a.monto), a.moneda)}</TableCell>
                       <TableCell><Badge variant="outline">{a.moneda}</Badge></TableCell>
+                      <TableCell>
+                        <WireRevertButtons abonoId={a.id} />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
