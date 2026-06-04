@@ -21,18 +21,22 @@ export async function DELETE(
     const totalZelle = Number(cuadre.totalZelleUsd);
     const cupChange = Number(cuadre.deudaFinalCup) - Number(cuadre.deudaInicialCup) + Number(cuadre.pagadoCup);
 
+    // Use raw SQL for balance revert (Prisma 7 decrement broken on Decimal)
+    const personaActual = await prisma.$queryRawUnsafe<Array<{ balance_cup: number; balance_usd: number }>>(
+      `SELECT balance_cup, balance_usd FROM personas WHERE id = $1`,
+      cuadre.personaId
+    );
+    if (personaActual.length > 0) {
+      const newCup = Number(personaActual[0].balance_cup) - cupChange;
+      const newUsd = Number(personaActual[0].balance_usd) - totalZelle;
+      await prisma.$executeRawUnsafe(
+        `UPDATE personas SET balance_cup = $1, balance_usd = $2 WHERE id = $3`,
+        newCup, newUsd, cuadre.personaId
+      );
+    }
+
     await prisma.$transaction([
-      // Revert persona balances
-      prisma.persona.update({
-        where: { id: cuadre.personaId },
-        data: {
-          balanceCup: { decrement: cupChange },
-          balanceUsd: { decrement: totalZelle },
-        },
-      }),
-      // Delete lineas
       prisma.lineaCuadre.deleteMany({ where: { cuadreId: cuadre.id } }),
-      // Delete cuadre
       prisma.cuadre.delete({ where: { id: cuadre.id } }),
     ]);
 
