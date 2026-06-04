@@ -59,21 +59,16 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      const usdChange = data.totalZelleUsd;
+      // Update persona balances directly
+      const persona = await tx.persona.update({
+        where: { id: data.personaId },
+        data: {
+          balanceCup: data.deudaFinalCup,
+          balanceUsd: { increment: data.totalZelleUsd },
+        },
+      });
 
-      // Use raw SQL: balanceCup = deudaFinalCup (absolute, not increment)
-      // balanceUsd = accumulated (each cuadre adds new Zelle)
-      const personaActual = await tx.$queryRawUnsafe<Array<{ balance_usd: number }>>(
-        `SELECT balance_usd FROM personas WHERE id = $1`,
-        data.personaId
-      );
-      const newUsd = (personaActual.length > 0 ? Number(personaActual[0].balance_usd) : 0) + usdChange;
-      await tx.$executeRawUnsafe(
-        `UPDATE personas SET balance_cup = $1, balance_usd = $2 WHERE id = $3`,
-        data.deudaFinalCup, newUsd, data.personaId
-      );
-
-      return { cuadre, personaId: data.personaId };
+      return { cuadre, persona };
     });
 
     return NextResponse.json(result, { status: 201 });

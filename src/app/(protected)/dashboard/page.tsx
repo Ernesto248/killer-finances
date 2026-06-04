@@ -7,17 +7,12 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   await requireAuth();
 
-  const now = new Date();
+  const cuentas = await prisma.cuentaBancaria.findMany();
 
-  // Use raw SQL for cuentaBancaria (Prisma 7 findMany bug)
-  const cuentas = await prisma.$queryRawUnsafe<Array<{ moneda: string; tipo: string; saldo_actual: number }>>(
-    `SELECT moneda, tipo, saldo_actual FROM cuentas_bancarias`
-  );
-
-  const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldo_actual), 0);
-  const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldo_actual), 0);
-  const balanceBancosCup = cuentas.filter(c => c.moneda === "CUP" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldo_actual), 0);
-  const balanceEfectivoCup = cuentas.filter(c => c.moneda === "CUP" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldo_actual), 0);
+  const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
+  const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
+  const balanceBancosCup = cuentas.filter(c => c.moneda === "CUP" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
+  const balanceEfectivoCup = cuentas.filter(c => c.moneda === "CUP" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
 
   const [
     wiresGanancia,

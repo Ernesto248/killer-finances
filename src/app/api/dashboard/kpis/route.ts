@@ -6,14 +6,12 @@ export async function GET(req: NextRequest) {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
 
-    const cuentas = await prisma.$queryRawUnsafe<Array<{ moneda: string; tipo: string; saldo_actual: number }>>(
-      `SELECT moneda, tipo, saldo_actual FROM cuentas_bancarias`
-    );
+    const cuentas = await prisma.cuentaBancaria.findMany();
 
-    const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldo_actual), 0);
-    const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldo_actual), 0);
-    const balanceBancosCup = cuentas.filter(c => c.moneda === "CUP" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldo_actual), 0);
-    const balanceEfectivoCup = cuentas.filter(c => c.moneda === "CUP" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldo_actual), 0);
+    const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
+    const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
+    const balanceBancosCup = cuentas.filter(c => c.moneda === "CUP" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
+    const balanceEfectivoCup = cuentas.filter(c => c.moneda === "CUP" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
 
     const [wiresGanancia, reventasGanancia, totalRemeseros, remeserosActivos, wiresPendientes, config, lineasCuadre] =
       await Promise.all([

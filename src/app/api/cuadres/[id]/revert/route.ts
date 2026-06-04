@@ -20,16 +20,15 @@ export async function DELETE(
 
     const totalZelle = Number(cuadre.totalZelleUsd);
 
-    // Revert: balanceCup = deudaInicialCup, balanceUsd = accumulated - this cuadre's Zelle
-    const personaActual = await prisma.$queryRawUnsafe<Array<{ balance_usd: number }>>(
-      `SELECT balance_usd FROM personas WHERE id = $1`,
-      cuadre.personaId
-    );
-    const newUsd = (personaActual.length > 0 ? Number(personaActual[0].balance_usd) : 0) - totalZelle;
-    await prisma.$executeRawUnsafe(
-      `UPDATE personas SET balance_cup = $1, balance_usd = $2 WHERE id = $3`,
-      cuadre.deudaInicialCup, Math.max(0, newUsd), cuadre.personaId
-    );
+    // Revert: balanceCup back to initial, balanceUsd decremented
+    const persona = await prisma.persona.findUnique({ where: { id: cuadre.personaId }, select: { balanceUsd: true } });
+    await prisma.persona.update({
+      where: { id: cuadre.personaId },
+      data: {
+        balanceCup: cuadre.deudaInicialCup,
+        balanceUsd: Math.max(0, Number(persona?.balanceUsd ?? 0) - totalZelle),
+      },
+    });
 
     await prisma.$transaction([
       prisma.lineaCuadre.deleteMany({ where: { cuadreId: cuadre.id } }),
