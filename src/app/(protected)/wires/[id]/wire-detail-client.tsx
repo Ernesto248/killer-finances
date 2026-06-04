@@ -42,7 +42,7 @@ export function WireDetailClient({ wireId }: { wireId: string }) {
         size="sm"
       >
         <Plus className="size-4" />
-        Nuevo Abono
+        Nuevo Pago
       </Button>
       <AbonoModal
         open={abonoModalOpen}
