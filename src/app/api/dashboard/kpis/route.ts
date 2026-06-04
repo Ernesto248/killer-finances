@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { safeFindCuentas } from "@/lib/cuentas-helpers";
 
 export async function GET(req: NextRequest) {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
 
-    const cuentas = await prisma.cuentaBancaria.findMany();
+    const cuentas = await safeFindCuentas();
 
     const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
     const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
