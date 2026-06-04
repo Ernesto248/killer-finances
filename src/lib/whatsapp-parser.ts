@@ -17,51 +17,92 @@ interface ParsedCuadre {
 }
 
 export function parseWhatsAppText(text: string): ParsedCuadre {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+  const lines = text.split("\n");
 
   let deudaInicialCup = 0;
   let pagadoCup = 0;
   const lineasTirado: ParsedLinea[] = [];
   let deudaFinalCup = 0;
 
-  let section: "ini" | "pag" | "tir" | "fin" = "ini";
+  let section: "ini" | "pag" | "pen" | "tir" | "fin" | "none" = "ini";
+  let inicioSeen = false;
 
-  for (const line of lines) {
-    const clean = line.replace(/[🚩🪎🇺🇲📌📖📕🇲🇽*$#]/g, "").trim();
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
 
-    if (clean.match(/inicio/i)) { section = "ini"; continue; }
-    if (clean.match(/pagado/i)) { section = "pag"; continue; }
-    if (clean.match(/tira[dt]o/i)) { section = "tir"; continue; }
-    if (clean.match(/final/i)) { section = "fin"; continue; }
-    if (clean.match(/pendiente/i)) { continue; }
+    // Skip the @Name signature line
+    if (line.startsWith("@") || line.includes("RECTIFICAR")) continue;
 
-    if (clean.match(/deuda/i)) {
-      const num = extractNumber(clean);
-      if (section === "ini") deudaInicialCup = num;
-      if (section === "fin") deudaFinalCup = num;
+    // Detect section by emoji markers on the RAW line
+    if (line.includes("🚩")) {
+      if (!inicioSeen) {
+        section = "ini";
+        inicioSeen = true;
+      } else {
+        section = "fin";
+      }
+      continue;
+    }
+
+    if (line.includes("🪎")) {
+      section = "pag";
+      continue;
+    }
+
+    if (line.includes("🇺🇲")) {
+      section = "tir";
+      continue;
+    }
+
+    if (line.includes("📌")) {
+      section = "pen";
+      continue;
+    }
+
+    // Extract numbers from the line
+    if (section === "ini") {
+      const num = extractNumber(line);
+      if (num > 0 && num < 100000000) deudaInicialCup = num;
       continue;
     }
 
     if (section === "pag") {
-      const num = extractNumber(clean);
-      if (num > 0) pagadoCup = num;
+      const num = extractNumber(line);
+      if (num > 0) pagadoCup += num;
+      continue;
+    }
+
+    if (section === "pen") {
+      // Skip pendientes completely
       continue;
     }
 
     if (section === "tir") {
-      const parts = clean.split(/[×x*]/);
-      if (parts.length >= 2) {
-        const montoUsd = extractNumber(parts[0]);
-        const tasa = extractNumber(parts[1]);
-        if (montoUsd > 0 && tasa > 0) {
-          lineasTirado.push({
-            montoUsd,
-            tasa,
-            montoCupResultante: Math.round(montoUsd * tasa * 100) / 100,
-            modalidad: "TASA",
-          });
+      const num = extractNumber(line);
+      if (num > 0) {
+        // Look for "number × number" pattern
+        const parts = line.split(/[×x*]/);
+        if (parts.length >= 2) {
+          const montoUsd = extractNumber(parts[0]);
+          const tasa = extractNumber(parts[1]);
+          if (montoUsd > 0 && tasa > 0) {
+            lineasTirado.push({
+              montoUsd,
+              tasa,
+              montoCupResultante: Math.round(montoUsd * tasa * 100) / 100,
+              modalidad: "TASA",
+            });
+          }
         }
       }
+      continue;
+    }
+
+    if (section === "fin") {
+      const num = extractNumber(line);
+      if (num > 0 && num < 100000000) deudaFinalCup = num;
+      continue;
     }
   }
 
@@ -73,7 +114,8 @@ export function parseWhatsAppText(text: string): ParsedCuadre {
   const deudaCalculada = deudaInicialCup - pagadoCup +
     lineasTirado.reduce((s, l) => s + l.montoCupResultante, 0);
 
-  const valid = Math.abs(deudaCalculada - deudaFinalCup) <= 1;
+  const absDiff = Math.abs(Math.abs(deudaCalculada) - Math.abs(deudaFinalCup));
+  const valid = absDiff <= 1;
 
   return {
     deudaInicialCup,
