@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 
-function sum(arr: any[], field: string): number {
-  return arr.reduce((s, r) => s + Number(r[field]), 0);
-}
-
 export async function GET(req: NextRequest) {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
@@ -16,30 +12,25 @@ export async function GET(req: NextRequest) {
     const dateFilter: Record<string, Date> = {};
     if (from) dateFilter.gte = new Date(from);
     if (to) dateFilter.lte = new Date(to);
+    const hasFilter = from || to;
 
-    const wiresWhere = (from || to) ? { fecha: dateFilter } : {};
-    const reventasWhere = (from || to) ? { fecha: dateFilter } : {};
-    const cuadresWhere = (from || to) ? { fecha: dateFilter } : {};
+    const wiresWhere = hasFilter ? { fecha: dateFilter } : {};
+    const reventasWhere = hasFilter ? { fecha: dateFilter } : {};
 
-    const [
-      balanceBancosUsdData, balanceEfectivoUsdData, balanceBancosCupData, balanceEfectivoCupData,
-      gananciaCupWiresData, gananciaCupReventasData,
-      totalRemeseros, remeserosActivos, wiresPendientes,
-    ] = await Promise.all([
-      prisma.cuentaBancaria.findMany({ where: { moneda: "USD", tipo: { in: ["ZELLE", "BANCO"] } }, select: { saldoActual: true } }),
-      prisma.cuentaBancaria.findMany({ where: { moneda: "USD", tipo: "EFECTIVO" }, select: { saldoActual: true } }),
-      prisma.cuentaBancaria.findMany({ where: { moneda: "CUP", tipo: { in: ["ZELLE", "BANCO"] } }, select: { saldoActual: true } }),
-      prisma.cuentaBancaria.findMany({ where: { moneda: "CUP", tipo: "EFECTIVO" }, select: { saldoActual: true } }),
-      prisma.wire.findMany({ where: wiresWhere, select: { gananciaCup: true } }),
-      prisma.reventaWire.findMany({ where: reventasWhere, select: { gananciaCup: true } }),
-      prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }),
-      prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }),
-      prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } }),
-    ]);
-
+    const cuentas = await prisma.cuentaBancaria.findMany();
+    const wiresGanancia = await prisma.wire.findMany({ select: { gananciaCup: true }, where: wiresWhere });
+    const reventasGanancia = await prisma.reventaWire.findMany({ select: { gananciaCup: true }, where: reventasWhere });
+    const totalRemeseros = await prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } });
+    const remeserosActivos = await prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } });
+    const wiresPendientes = await prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } });
     const config = await prisma.configuracion.findUnique({ where: { id: "global" } });
-
     const lineasCuadre = await prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } });
+
+    const balanceBancosUsd = cuentas.filter(c => c.moneda === "USD" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
+    const balanceEfectivoUsd = cuentas.filter(c => c.moneda === "USD" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
+    const balanceBancosCup = cuentas.filter(c => c.moneda === "CUP" && (c.tipo === "ZELLE" || c.tipo === "BANCO")).reduce((s, c) => s + Number(c.saldoActual), 0);
+    const balanceEfectivoCup = cuentas.filter(c => c.moneda === "CUP" && c.tipo === "EFECTIVO").reduce((s, c) => s + Number(c.saldoActual), 0);
+
     let tasaAdquisicion = 0;
     let totalUsdCuadres = 0;
     for (const l of lineasCuadre) {
@@ -50,11 +41,6 @@ export async function GET(req: NextRequest) {
     }
     tasaAdquisicion = totalUsdCuadres > 0 ? Math.round(tasaAdquisicion / totalUsdCuadres) : 0;
 
-    const balanceBancosUsd = sum(balanceBancosUsdData, "saldoActual");
-    const balanceEfectivoUsd = sum(balanceEfectivoUsdData, "saldoActual");
-    const balanceBancosCup = sum(balanceBancosCupData, "saldoActual");
-    const balanceEfectivoCup = sum(balanceEfectivoCupData, "saldoActual");
-
     return NextResponse.json({
       balanceBancosUsd,
       balanceEfectivoUsd,
@@ -62,7 +48,7 @@ export async function GET(req: NextRequest) {
       balanceEfectivoCup,
       balanceUsd: balanceBancosUsd + balanceEfectivoUsd,
       balanceCup: balanceBancosCup + balanceEfectivoCup,
-      gananciaCup: sum(gananciaCupWiresData, "gananciaCup") + sum(gananciaCupReventasData, "gananciaCup"),
+      gananciaCup: wiresGanancia.reduce((s, w) => s + Number(w.gananciaCup), 0) + reventasGanancia.reduce((s, r) => s + Number(r.gananciaCup), 0),
       remeserosActivos,
       totalRemeseros,
       wiresPendientes: wiresPendientes.length,
