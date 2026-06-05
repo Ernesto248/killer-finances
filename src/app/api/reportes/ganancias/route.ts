@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,11 +16,11 @@ export async function GET(req: NextRequest) {
 
     const [gananciaWiresData, gananciaReventasData, gananciaComisionesData, totalWires, totalReventas] =
       await Promise.all([
-        prisma.wire.findMany({ where: { fecha: { gte: from, lte: to } }, select: { gananciaCup: true } }),
-        prisma.reventaWire.findMany({ where: { fecha: { gte: from, lte: to } }, select: { gananciaCup: true } }),
-        prisma.lineaCuadre.findMany({ where: { cuadre: { fecha: { gte: from, lte: to } } }, select: { gananciaUsd: true } }),
-        prisma.wire.count({ where: { fecha: { gte: from, lte: to } } }),
-        prisma.reventaWire.count({ where: { fecha: { gte: from, lte: to } } }),
+        withRetry(() => prisma.wire.findMany({ where: { fecha: { gte: from, lte: to } }, select: { gananciaCup: true } }), { label: "ganancias.wires" }),
+        withRetry(() => prisma.reventaWire.findMany({ where: { fecha: { gte: from, lte: to } }, select: { gananciaCup: true } }), { label: "ganancias.reventas" }),
+        withRetry(() => prisma.lineaCuadre.findMany({ where: { cuadre: { fecha: { gte: from, lte: to } } }, select: { gananciaUsd: true } }), { label: "ganancias.comisiones" }),
+        withRetry(() => prisma.wire.count({ where: { fecha: { gte: from, lte: to } } }), { label: "ganancias.countWires" }),
+        withRetry(() => prisma.reventaWire.count({ where: { fecha: { gte: from, lte: to } } }), { label: "ganancias.countReventas" }),
       ]);
 
     const periodo = `${year}-${String(month).padStart(2, "0")}`;

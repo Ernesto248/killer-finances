@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
+import { safeFindPersonas } from "@/lib/personas-helpers";
 import { personaSchema } from "@/lib/validations";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const personas = await prisma.persona.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    const personas = await safeFindPersonas();
     return NextResponse.json(personas);
   } catch (error: unknown) {
     const err = error as Error & { errors?: unknown };
@@ -28,17 +28,20 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = personaSchema.parse(body);
 
-    const persona = await prisma.persona.create({
-      data: {
-        nombre: data.nombre,
-        telefono: data.telefono ?? null,
-        alias: data.alias ?? null,
-        tipo: data.tipo,
-        activo: data.activo,
-        balanceUsd: data.balanceUsd ?? 0,
-        balanceCup: data.balanceCup ?? 0,
-      },
-    });
+    const persona = await withRetry(
+      () => prisma.persona.create({
+        data: {
+          nombre: data.nombre,
+          telefono: data.telefono ?? null,
+          alias: data.alias ?? null,
+          tipo: data.tipo,
+          activo: data.activo,
+          balanceUsd: data.balanceUsd ?? 0,
+          balanceCup: data.balanceCup ?? 0,
+        },
+      }),
+      { label: "personas.create" }
+    );
 
     return NextResponse.json(persona, { status: 201 });
   } catch (error: unknown) {

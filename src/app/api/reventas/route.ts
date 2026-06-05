@@ -1,23 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { reventaWireSchema } from "@/lib/validations";
 import { Prisma } from "@/generated/prisma/client";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const reventas = await prisma.reventaWire.findMany({
-      orderBy: { fecha: "desc" },
-      include: {
-        comprador: {
-          select: { id: true, nombre: true },
-        },
-        vendedor: {
-          select: { id: true, nombre: true },
-        },
-      },
-    });
+    const reventas = await withRetry(
+      () =>
+        prisma.reventaWire.findMany({
+          orderBy: { fecha: "desc" },
+          select: {
+            id: true,
+            compradorId: true,
+            vendedorId: true,
+            fecha: true,
+            montoUsd: true,
+            tasaCompra: true,
+            tasaVenta: true,
+            gananciaCup: true,
+            deudaCompradorPendiente: true,
+            deudaVendedorPendiente: true,
+            createdAt: true,
+            comprador: { select: { id: true, nombre: true } },
+            vendedor: { select: { id: true, nombre: true } },
+          },
+        }),
+      { label: "reventas.list" }
+    );
     return NextResponse.json(reventas);
   } catch (error: unknown) {
     const err = error as Error;
@@ -42,34 +54,43 @@ export async function POST(req: NextRequest) {
     const deudaVendedorPendiente = Math.round(data.montoUsd * data.tasaVenta);
 
     const [reventa] = await prisma.$transaction([
-      prisma.reventaWire.create({
-        data: {
-          compradorId: data.compradorId,
-          vendedorId: data.vendedorId,
-          montoUsd: data.montoUsd,
-          tasaCompra: data.tasaCompra,
-          tasaVenta: data.tasaVenta,
-          gananciaCup,
-          deudaCompradorPendiente,
-          deudaVendedorPendiente,
-        },
-        include: {
-          comprador: {
-            select: { id: true, nombre: true },
+      withRetry(
+        () => prisma.reventaWire.create({
+          data: {
+            compradorId: data.compradorId,
+            vendedorId: data.vendedorId,
+            montoUsd: data.montoUsd,
+            tasaCompra: data.tasaCompra,
+            tasaVenta: data.tasaVenta,
+            gananciaCup,
+            deudaCompradorPendiente,
+            deudaVendedorPendiente,
           },
-          vendedor: {
-            select: { id: true, nombre: true },
+          include: {
+            comprador: {
+              select: { id: true, nombre: true },
+            },
+            vendedor: {
+              select: { id: true, nombre: true },
+            },
           },
-        },
-      }),
-      prisma.persona.update({
-        where: { id: data.compradorId },
-        data: { balanceCup: { increment: deudaCompradorPendiente } },
-      }),
-      prisma.persona.update({
-        where: { id: data.vendedorId },
-        data: { balanceCup: { decrement: deudaVendedorPendiente } },
-      }),
+        }),
+        { label: "reventas.create" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: data.compradorId },
+          data: { balanceCup: { increment: deudaCompradorPendiente } },
+        }),
+        { label: "reventas.create.comprador" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: data.vendedorId },
+          data: { balanceCup: { decrement: deudaVendedorPendiente } },
+        }),
+        { label: "reventas.create.vendedor" }
+      ),
     ]);
 
     return NextResponse.json(reventa, { status: 201 });

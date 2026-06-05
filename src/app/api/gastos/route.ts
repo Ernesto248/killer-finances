@@ -1,19 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { gastoSchema } from "@/lib/validations";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const gastos = await prisma.gasto.findMany({
-      orderBy: { fecha: "desc" },
-      include: {
-        lote: {
-          select: { id: true, nombre: true },
-        },
-      },
-    });
+    const gastos = await withRetry(
+      () =>
+        prisma.gasto.findMany({
+          orderBy: { fecha: "desc" },
+          select: {
+            id: true,
+            fecha: true,
+            monto: true,
+            moneda: true,
+            categoria: true,
+            descripcion: true,
+            loteId: true,
+            createdAt: true,
+            lote: { select: { id: true, nombre: true } },
+          },
+        }),
+      { label: "gastos.list" }
+    );
     return NextResponse.json(gastos);
   } catch (error: unknown) {
     const err = error as Error;
@@ -33,20 +44,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = gastoSchema.parse(body);
 
-    const gasto = await prisma.gasto.create({
-      data: {
-        monto: data.monto,
-        moneda: data.moneda,
-        categoria: data.categoria,
-        descripcion: data.descripcion ?? null,
-        loteId: data.loteId ?? null,
-      },
-      include: {
-        lote: {
-          select: { id: true, nombre: true },
+    const gasto = await withRetry(
+      () => prisma.gasto.create({
+        data: {
+          monto: data.monto,
+          moneda: data.moneda,
+          categoria: data.categoria,
+          descripcion: data.descripcion ?? null,
+          loteId: data.loteId ?? null,
         },
-      },
-    });
+        include: {
+          lote: {
+            select: { id: true, nombre: true },
+          },
+        },
+      }),
+      { label: "gastos.create" }
+    );
 
     return NextResponse.json(gasto, { status: 201 });
   } catch (error: unknown) {

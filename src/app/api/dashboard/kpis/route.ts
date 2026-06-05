@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { safeFindCuentas } from "@/lib/cuentas-helpers";
 
 export async function GET(req: NextRequest) {
@@ -16,13 +17,13 @@ export async function GET(req: NextRequest) {
 
     const [wiresGanancia, reventasGanancia, totalRemeseros, remeserosActivos, wiresPendientes, config, lineasCuadre] =
       await Promise.all([
-        prisma.wire.findMany({ select: { gananciaCup: true } }),
-        prisma.reventaWire.findMany({ select: { gananciaCup: true } }),
-        prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }),
-        prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }),
-        prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } }),
-        prisma.configuracion.findUnique({ where: { id: "global" } }),
-        prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } }),
+        withRetry(() => prisma.wire.findMany({ select: { gananciaCup: true } }), { label: "kpis.wires" }),
+        withRetry(() => prisma.reventaWire.findMany({ select: { gananciaCup: true } }), { label: "kpis.reventas" }),
+        withRetry(() => prisma.persona.count({ where: { tipo: { contains: "REMESERO" } } }), { label: "kpis.totalRemeseros" }),
+        withRetry(() => prisma.persona.count({ where: { tipo: { contains: "REMESERO" }, activo: true } }), { label: "kpis.remeserosActivos" }),
+        withRetry(() => prisma.wire.findMany({ where: { estado: { not: "PAGADO" } }, select: { montoUsd: true } }), { label: "kpis.wiresPendientes" }),
+        withRetry(() => prisma.configuracion.findUnique({ where: { id: "global" } }), { label: "kpis.config" }),
+        withRetry(() => prisma.lineaCuadre.findMany({ select: { montoUsd: true, tasa: true } }), { label: "kpis.lineasCuadre" }),
       ]);
 
     let tasaAdquisicion = 0;

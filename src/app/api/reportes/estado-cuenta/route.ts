@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,22 +22,23 @@ export async function GET(req: NextRequest) {
     const toDate = new Date(to);
     toDate.setHours(23, 59, 59, 999);
 
-    const persona = await prisma.persona.findUnique({
-      where: { id: personaId },
-      select: { id: true, nombre: true, alias: true },
-    });
+    const persona = await withRetry(
+      () => prisma.persona.findUnique({ where: { id: personaId }, select: { id: true, nombre: true, alias: true } }),
+      { label: "estadoCuenta.persona" }
+    );
 
     if (!persona) {
       return NextResponse.json({ error: "Persona no encontrada" }, { status: 404 });
     }
 
-    const lastCuadreBeforeFrom = await prisma.cuadre.findFirst({
-      where: {
-        personaId,
-        fecha: { lt: fromDate },
-      },
-      orderBy: { fecha: "desc" },
-    });
+    const lastCuadreBeforeFrom = await withRetry(
+      () => prisma.cuadre.findFirst({
+        where: { personaId, fecha: { lt: fromDate } },
+        orderBy: { fecha: "desc" },
+        select: { totalZelleUsd: true, deudaFinalCup: true },
+      }),
+      { label: "estadoCuenta.lastCuadre" }
+    );
 
     const balanceInicial = {
       usd: Number(lastCuadreBeforeFrom?.totalZelleUsd ?? 0),
@@ -44,19 +46,28 @@ export async function GET(req: NextRequest) {
     };
 
     const [cuadres, pagos, wires] = await Promise.all([
-      prisma.cuadre.findMany({
-        where: { personaId, fecha: { gte: fromDate, lte: toDate } },
-        orderBy: { fecha: "asc" },
-        include: { lineas: true },
-      }),
-      prisma.pago.findMany({
-        where: { personaId, fecha: { gte: fromDate, lte: toDate } },
-        orderBy: { fecha: "asc" },
-      }),
-      prisma.wire.findMany({
-        where: { compradorId: personaId, fecha: { gte: fromDate, lte: toDate } },
-        orderBy: { fecha: "asc" },
-      }),
+      withRetry(
+        () => prisma.cuadre.findMany({
+          where: { personaId, fecha: { gte: fromDate, lte: toDate } },
+          orderBy: { fecha: "asc" },
+          include: { lineas: true },
+        }),
+        { label: "estadoCuenta.cuadres" }
+      ),
+      withRetry(
+        () => prisma.pago.findMany({
+          where: { personaId, fecha: { gte: fromDate, lte: toDate } },
+          orderBy: { fecha: "asc" },
+        }),
+        { label: "estadoCuenta.pagos" }
+      ),
+      withRetry(
+        () => prisma.wire.findMany({
+          where: { compradorId: personaId, fecha: { gte: fromDate, lte: toDate } },
+          orderBy: { fecha: "asc" },
+        }),
+        { label: "estadoCuenta.wires" }
+      ),
     ]);
 
     const usdFromCuadres = cuadres.reduce((s, c) => s + Number(c.totalZelleUsd), 0);

@@ -27,6 +27,8 @@ export type AggregateCuadre = {
 }
 
 export type CuadreAvgAggregateOutputType = {
+  previousBalanceCup: runtime.Decimal | null
+  previousBalanceUsd: runtime.Decimal | null
   deudaInicialCup: runtime.Decimal | null
   pagadoCup: runtime.Decimal | null
   deudaFinalCup: runtime.Decimal | null
@@ -35,6 +37,8 @@ export type CuadreAvgAggregateOutputType = {
 }
 
 export type CuadreSumAggregateOutputType = {
+  previousBalanceCup: runtime.Decimal | null
+  previousBalanceUsd: runtime.Decimal | null
   deudaInicialCup: runtime.Decimal | null
   pagadoCup: runtime.Decimal | null
   deudaFinalCup: runtime.Decimal | null
@@ -47,6 +51,8 @@ export type CuadreMinAggregateOutputType = {
   personaId: string | null
   fecha: Date | null
   nota: string | null
+  previousBalanceCup: runtime.Decimal | null
+  previousBalanceUsd: runtime.Decimal | null
   deudaInicialCup: runtime.Decimal | null
   pagadoCup: runtime.Decimal | null
   deudaFinalCup: runtime.Decimal | null
@@ -60,6 +66,8 @@ export type CuadreMaxAggregateOutputType = {
   personaId: string | null
   fecha: Date | null
   nota: string | null
+  previousBalanceCup: runtime.Decimal | null
+  previousBalanceUsd: runtime.Decimal | null
   deudaInicialCup: runtime.Decimal | null
   pagadoCup: runtime.Decimal | null
   deudaFinalCup: runtime.Decimal | null
@@ -73,6 +81,8 @@ export type CuadreCountAggregateOutputType = {
   personaId: number
   fecha: number
   nota: number
+  previousBalanceCup: number
+  previousBalanceUsd: number
   deudaInicialCup: number
   pagadoCup: number
   deudaFinalCup: number
@@ -84,6 +94,8 @@ export type CuadreCountAggregateOutputType = {
 
 
 export type CuadreAvgAggregateInputType = {
+  previousBalanceCup?: true
+  previousBalanceUsd?: true
   deudaInicialCup?: true
   pagadoCup?: true
   deudaFinalCup?: true
@@ -92,6 +104,8 @@ export type CuadreAvgAggregateInputType = {
 }
 
 export type CuadreSumAggregateInputType = {
+  previousBalanceCup?: true
+  previousBalanceUsd?: true
   deudaInicialCup?: true
   pagadoCup?: true
   deudaFinalCup?: true
@@ -104,6 +118,8 @@ export type CuadreMinAggregateInputType = {
   personaId?: true
   fecha?: true
   nota?: true
+  previousBalanceCup?: true
+  previousBalanceUsd?: true
   deudaInicialCup?: true
   pagadoCup?: true
   deudaFinalCup?: true
@@ -117,6 +133,8 @@ export type CuadreMaxAggregateInputType = {
   personaId?: true
   fecha?: true
   nota?: true
+  previousBalanceCup?: true
+  previousBalanceUsd?: true
   deudaInicialCup?: true
   pagadoCup?: true
   deudaFinalCup?: true
@@ -130,6 +148,8 @@ export type CuadreCountAggregateInputType = {
   personaId?: true
   fecha?: true
   nota?: true
+  previousBalanceCup?: true
+  previousBalanceUsd?: true
   deudaInicialCup?: true
   pagadoCup?: true
   deudaFinalCup?: true
@@ -230,6 +250,8 @@ export type CuadreGroupByOutputType = {
   personaId: string
   fecha: Date
   nota: string | null
+  previousBalanceCup: runtime.Decimal | null
+  previousBalanceUsd: runtime.Decimal | null
   deudaInicialCup: runtime.Decimal
   pagadoCup: runtime.Decimal
   deudaFinalCup: runtime.Decimal
@@ -266,6 +288,8 @@ export type CuadreWhereInput = {
   personaId?: Prisma.StringFilter<"Cuadre"> | string
   fecha?: Prisma.DateTimeFilter<"Cuadre"> | Date | string
   nota?: Prisma.StringNullableFilter<"Cuadre"> | string | null
+  previousBalanceCup?: Prisma.DecimalNullableFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.DecimalNullableFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -281,6 +305,8 @@ export type CuadreOrderByWithRelationInput = {
   personaId?: Prisma.SortOrder
   fecha?: Prisma.SortOrder
   nota?: Prisma.SortOrderInput | Prisma.SortOrder
+  previousBalanceCup?: Prisma.SortOrderInput | Prisma.SortOrder
+  previousBalanceUsd?: Prisma.SortOrderInput | Prisma.SortOrder
   deudaInicialCup?: Prisma.SortOrder
   pagadoCup?: Prisma.SortOrder
   deudaFinalCup?: Prisma.SortOrder
@@ -299,6 +325,8 @@ export type CuadreWhereUniqueInput = Prisma.AtLeast<{
   personaId?: Prisma.StringFilter<"Cuadre"> | string
   fecha?: Prisma.DateTimeFilter<"Cuadre"> | Date | string
   nota?: Prisma.StringNullableFilter<"Cuadre"> | string | null
+  previousBalanceCup?: Prisma.DecimalNullableFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.DecimalNullableFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -314,6 +342,8 @@ export type CuadreOrderByWithAggregationInput = {
   personaId?: Prisma.SortOrder
   fecha?: Prisma.SortOrder
   nota?: Prisma.SortOrderInput | Prisma.SortOrder
+  previousBalanceCup?: Prisma.SortOrderInput | Prisma.SortOrder
+  previousBalanceUsd?: Prisma.SortOrderInput | Prisma.SortOrder
   deudaInicialCup?: Prisma.SortOrder
   pagadoCup?: Prisma.SortOrder
   deudaFinalCup?: Prisma.SortOrder
@@ -335,6 +365,8 @@ export type CuadreScalarWhereWithAggregatesInput = {
   personaId?: Prisma.StringWithAggregatesFilter<"Cuadre"> | string
   fecha?: Prisma.DateTimeWithAggregatesFilter<"Cuadre"> | Date | string
   nota?: Prisma.StringNullableWithAggregatesFilter<"Cuadre"> | string | null
+  previousBalanceCup?: Prisma.DecimalNullableWithAggregatesFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.DecimalNullableWithAggregatesFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalWithAggregatesFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalWithAggregatesFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalWithAggregatesFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -347,6 +379,8 @@ export type CuadreCreateInput = {
   id?: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -362,6 +396,8 @@ export type CuadreUncheckedCreateInput = {
   personaId: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -375,6 +411,8 @@ export type CuadreUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -390,6 +428,8 @@ export type CuadreUncheckedUpdateInput = {
   personaId?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -404,6 +444,8 @@ export type CuadreCreateManyInput = {
   personaId: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -416,6 +458,8 @@ export type CuadreUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -429,6 +473,8 @@ export type CuadreUncheckedUpdateManyInput = {
   personaId?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -452,6 +498,8 @@ export type CuadreCountOrderByAggregateInput = {
   personaId?: Prisma.SortOrder
   fecha?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  previousBalanceCup?: Prisma.SortOrder
+  previousBalanceUsd?: Prisma.SortOrder
   deudaInicialCup?: Prisma.SortOrder
   pagadoCup?: Prisma.SortOrder
   deudaFinalCup?: Prisma.SortOrder
@@ -461,6 +509,8 @@ export type CuadreCountOrderByAggregateInput = {
 }
 
 export type CuadreAvgOrderByAggregateInput = {
+  previousBalanceCup?: Prisma.SortOrder
+  previousBalanceUsd?: Prisma.SortOrder
   deudaInicialCup?: Prisma.SortOrder
   pagadoCup?: Prisma.SortOrder
   deudaFinalCup?: Prisma.SortOrder
@@ -473,6 +523,8 @@ export type CuadreMaxOrderByAggregateInput = {
   personaId?: Prisma.SortOrder
   fecha?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  previousBalanceCup?: Prisma.SortOrder
+  previousBalanceUsd?: Prisma.SortOrder
   deudaInicialCup?: Prisma.SortOrder
   pagadoCup?: Prisma.SortOrder
   deudaFinalCup?: Prisma.SortOrder
@@ -486,6 +538,8 @@ export type CuadreMinOrderByAggregateInput = {
   personaId?: Prisma.SortOrder
   fecha?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  previousBalanceCup?: Prisma.SortOrder
+  previousBalanceUsd?: Prisma.SortOrder
   deudaInicialCup?: Prisma.SortOrder
   pagadoCup?: Prisma.SortOrder
   deudaFinalCup?: Prisma.SortOrder
@@ -495,6 +549,8 @@ export type CuadreMinOrderByAggregateInput = {
 }
 
 export type CuadreSumOrderByAggregateInput = {
+  previousBalanceCup?: Prisma.SortOrder
+  previousBalanceUsd?: Prisma.SortOrder
   deudaInicialCup?: Prisma.SortOrder
   pagadoCup?: Prisma.SortOrder
   deudaFinalCup?: Prisma.SortOrder
@@ -549,6 +605,14 @@ export type CuadreUncheckedUpdateManyWithoutPersonaNestedInput = {
   deleteMany?: Prisma.CuadreScalarWhereInput | Prisma.CuadreScalarWhereInput[]
 }
 
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
 export type CuadreCreateNestedOneWithoutLineasInput = {
   create?: Prisma.XOR<Prisma.CuadreCreateWithoutLineasInput, Prisma.CuadreUncheckedCreateWithoutLineasInput>
   connectOrCreate?: Prisma.CuadreCreateOrConnectWithoutLineasInput
@@ -567,6 +631,8 @@ export type CuadreCreateWithoutPersonaInput = {
   id?: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -580,6 +646,8 @@ export type CuadreUncheckedCreateWithoutPersonaInput = {
   id?: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -623,6 +691,8 @@ export type CuadreScalarWhereInput = {
   personaId?: Prisma.StringFilter<"Cuadre"> | string
   fecha?: Prisma.DateTimeFilter<"Cuadre"> | Date | string
   nota?: Prisma.StringNullableFilter<"Cuadre"> | string | null
+  previousBalanceCup?: Prisma.DecimalNullableFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.DecimalNullableFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFilter<"Cuadre"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -635,6 +705,8 @@ export type CuadreCreateWithoutLineasInput = {
   id?: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -649,6 +721,8 @@ export type CuadreUncheckedCreateWithoutLineasInput = {
   personaId: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -677,6 +751,8 @@ export type CuadreUpdateWithoutLineasInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -691,6 +767,8 @@ export type CuadreUncheckedUpdateWithoutLineasInput = {
   personaId?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -703,6 +781,8 @@ export type CuadreCreateManyPersonaInput = {
   id?: string
   fecha?: Date | string
   nota?: string | null
+  previousBalanceCup?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -715,6 +795,8 @@ export type CuadreUpdateWithoutPersonaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -728,6 +810,8 @@ export type CuadreUncheckedUpdateWithoutPersonaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -741,6 +825,8 @@ export type CuadreUncheckedUpdateManyWithoutPersonaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   fecha?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   nota?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  previousBalanceCup?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  previousBalanceUsd?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deudaInicialCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   pagadoCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   deudaFinalCup?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -785,6 +871,8 @@ export type CuadreSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   personaId?: boolean
   fecha?: boolean
   nota?: boolean
+  previousBalanceCup?: boolean
+  previousBalanceUsd?: boolean
   deudaInicialCup?: boolean
   pagadoCup?: boolean
   deudaFinalCup?: boolean
@@ -801,6 +889,8 @@ export type CuadreSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   personaId?: boolean
   fecha?: boolean
   nota?: boolean
+  previousBalanceCup?: boolean
+  previousBalanceUsd?: boolean
   deudaInicialCup?: boolean
   pagadoCup?: boolean
   deudaFinalCup?: boolean
@@ -815,6 +905,8 @@ export type CuadreSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   personaId?: boolean
   fecha?: boolean
   nota?: boolean
+  previousBalanceCup?: boolean
+  previousBalanceUsd?: boolean
   deudaInicialCup?: boolean
   pagadoCup?: boolean
   deudaFinalCup?: boolean
@@ -829,6 +921,8 @@ export type CuadreSelectScalar = {
   personaId?: boolean
   fecha?: boolean
   nota?: boolean
+  previousBalanceCup?: boolean
+  previousBalanceUsd?: boolean
   deudaInicialCup?: boolean
   pagadoCup?: boolean
   deudaFinalCup?: boolean
@@ -837,7 +931,7 @@ export type CuadreSelectScalar = {
   createdAt?: boolean
 }
 
-export type CuadreOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "personaId" | "fecha" | "nota" | "deudaInicialCup" | "pagadoCup" | "deudaFinalCup" | "totalZelleUsd" | "tasaPromedioCup" | "createdAt", ExtArgs["result"]["cuadre"]>
+export type CuadreOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "personaId" | "fecha" | "nota" | "previousBalanceCup" | "previousBalanceUsd" | "deudaInicialCup" | "pagadoCup" | "deudaFinalCup" | "totalZelleUsd" | "tasaPromedioCup" | "createdAt", ExtArgs["result"]["cuadre"]>
 export type CuadreInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   persona?: boolean | Prisma.PersonaDefaultArgs<ExtArgs>
   lineas?: boolean | Prisma.Cuadre$lineasArgs<ExtArgs>
@@ -861,6 +955,8 @@ export type $CuadrePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     personaId: string
     fecha: Date
     nota: string | null
+    previousBalanceCup: runtime.Decimal | null
+    previousBalanceUsd: runtime.Decimal | null
     deudaInicialCup: runtime.Decimal
     pagadoCup: runtime.Decimal
     deudaFinalCup: runtime.Decimal
@@ -1296,6 +1392,8 @@ export interface CuadreFieldRefs {
   readonly personaId: Prisma.FieldRef<"Cuadre", 'String'>
   readonly fecha: Prisma.FieldRef<"Cuadre", 'DateTime'>
   readonly nota: Prisma.FieldRef<"Cuadre", 'String'>
+  readonly previousBalanceCup: Prisma.FieldRef<"Cuadre", 'Decimal'>
+  readonly previousBalanceUsd: Prisma.FieldRef<"Cuadre", 'Decimal'>
   readonly deudaInicialCup: Prisma.FieldRef<"Cuadre", 'Decimal'>
   readonly pagadoCup: Prisma.FieldRef<"Cuadre", 'Decimal'>
   readonly deudaFinalCup: Prisma.FieldRef<"Cuadre", 'Decimal'>

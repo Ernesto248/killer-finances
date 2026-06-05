@@ -6,8 +6,8 @@ import Link from "next/link";
 
 import { toast } from "sonner";
 import { ExpandableCard } from "@/components/shared/expandable-card";
-import { FAB } from "@/components/shared/fab";
-import { Plus } from "lucide-react";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { MoreHorizontal, Plus, RotateCcw } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -17,6 +17,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { CuadreModal } from "./cuadre-modal";
 import { formatCurrency } from "@/lib/utils";
 import { canEdit } from "@/lib/role-utils";
@@ -50,6 +56,7 @@ export function CuadreTable() {
   const [cuadres, setCuadres] = useState<CuadreRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [revertTarget, setRevertTarget] = useState<CuadreRow | null>(null);
 
   const fetchCuadres = useCallback(async () => {
     try {
@@ -67,6 +74,28 @@ export function CuadreTable() {
   useEffect(() => {
     fetchCuadres();
   }, [fetchCuadres]);
+
+  const handleRevert = useCallback(async () => {
+    if (!revertTarget) return;
+
+    try {
+      const res = await fetch(`/api/cuadres/${revertTarget.id}/revert`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        toast.error(err?.error || "Error al revertir cuadre");
+        return;
+      }
+
+      toast.success("Cuadre revertido");
+      setRevertTarget(null);
+      fetchCuadres();
+    } catch {
+      toast.error("Error al revertir cuadre");
+    }
+  }, [fetchCuadres, revertTarget]);
 
   const userCanEdit = role ? canEdit(role) : false;
 
@@ -123,6 +152,20 @@ export function CuadreTable() {
                   }
                 >
                   <div className="space-y-3 pt-3">
+                    {userCanEdit && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRevertTarget(c);
+                        }}
+                      >
+                        <RotateCcw className="size-4" />
+                        Revertir
+                      </Button>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-[#6b7280]">Tasa Prom.</span>
                       <span className="text-sm font-mono">{num(c.tasaPromedioCup).toFixed(2)}</span>
@@ -162,6 +205,7 @@ export function CuadreTable() {
                 <TableHead className="text-right">USD Zelle</TableHead>
                 <TableHead className="text-right">Tasa Prom.</TableHead>
                 <TableHead className="text-right">Deuda Final</TableHead>
+                <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -192,12 +236,30 @@ export function CuadreTable() {
                     <TableCell className="text-right font-mono">
                       {num(c.tasaPromedioCup).toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatCurrency(num(c.deudaFinalCup), "CUP")}
-                    </TableCell>
-                  </tr>
-                ))}
-            </TableBody>
+                     <TableCell className="text-right font-mono">
+                       {formatCurrency(num(c.deudaFinalCup), "CUP")}
+                     </TableCell>
+                     <TableCell>
+                       {userCanEdit && (
+                         <DropdownMenu>
+                           <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+                             <MoreHorizontal className="size-4" />
+                           </DropdownMenuTrigger>
+                           <DropdownMenuContent align="end">
+                             <DropdownMenuItem
+                               variant="destructive"
+                               onClick={() => setRevertTarget(c)}
+                             >
+                               <RotateCcw className="size-4" />
+                               Revertir
+                             </DropdownMenuItem>
+                           </DropdownMenuContent>
+                         </DropdownMenu>
+                       )}
+                     </TableCell>
+                   </tr>
+                 ))}
+             </TableBody>
           </Table>
         )}
       </div>
@@ -206,6 +268,18 @@ export function CuadreTable() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         onSaved={fetchCuadres}
+      />
+
+      <ConfirmDialog
+        open={!!revertTarget}
+        onOpenChange={(open) => {
+          if (!open) setRevertTarget(null);
+        }}
+        title="Revertir Cuadre"
+        description={`Se eliminara el cuadre de "${revertTarget?.persona.nombre ?? ""}" y se revertiran sus balances.`}
+        confirmLabel="Revertir"
+        variant="destructive"
+        onConfirm={handleRevert}
       />
     </div>
   );

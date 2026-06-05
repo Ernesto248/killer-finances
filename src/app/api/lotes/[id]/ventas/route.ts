@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { loteVentaSchema } from "@/lib/validations";
 
 export async function GET(
@@ -9,15 +10,18 @@ export async function GET(
 ) {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const ventas = await prisma.loteVenta.findMany({
-      where: { loteId: params.id },
-      orderBy: { fecha: "desc" },
-      include: {
-        persona: {
-          select: { id: true, nombre: true },
+    const ventas = await withRetry(
+      () => prisma.loteVenta.findMany({
+        where: { loteId: params.id },
+        orderBy: { fecha: "desc" },
+        include: {
+          persona: {
+            select: { id: true, nombre: true },
+          },
         },
-      },
-    });
+      }),
+      { label: "lotes.ventas.list" }
+    );
     return NextResponse.json(ventas);
   } catch (error: unknown) {
     const err = error as Error;
@@ -40,20 +44,23 @@ export async function POST(
     const body = await req.json();
     const data = loteVentaSchema.parse(body);
 
-    const venta = await prisma.loteVenta.create({
-      data: {
-        loteId: params.id,
-        cantidad: data.cantidad,
-        precioUnitario: data.precioUnitario,
-        moneda: data.moneda,
-        personaId: data.personaId ?? null,
-      },
-      include: {
-        persona: {
-          select: { id: true, nombre: true },
+    const venta = await withRetry(
+      () => prisma.loteVenta.create({
+        data: {
+          loteId: params.id,
+          cantidad: data.cantidad,
+          precioUnitario: data.precioUnitario,
+          moneda: data.moneda,
+          personaId: data.personaId ?? null,
         },
-      },
-    });
+        include: {
+          persona: {
+            select: { id: true, nombre: true },
+          },
+        },
+      }),
+      { label: "lotes.ventas.create" }
+    );
 
     return NextResponse.json(venta, { status: 201 });
   } catch (error: unknown) {

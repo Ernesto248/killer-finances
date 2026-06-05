@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { gastoSchema } from "@/lib/validations";
 
 export async function PUT(
@@ -12,21 +13,24 @@ export async function PUT(
     const body = await req.json();
     const data = gastoSchema.parse(body);
 
-    const gasto = await prisma.gasto.update({
-      where: { id: params.id },
-      data: {
-        monto: data.monto,
-        moneda: data.moneda,
-        categoria: data.categoria,
-        descripcion: data.descripcion ?? null,
-        loteId: data.loteId ?? null,
-      },
-      include: {
-        lote: {
-          select: { id: true, nombre: true },
+    const gasto = await withRetry(
+      () => prisma.gasto.update({
+        where: { id: params.id },
+        data: {
+          monto: data.monto,
+          moneda: data.moneda,
+          categoria: data.categoria,
+          descripcion: data.descripcion ?? null,
+          loteId: data.loteId ?? null,
         },
-      },
-    });
+        include: {
+          lote: {
+            select: { id: true, nombre: true },
+          },
+        },
+      }),
+      { label: "gastos.update" }
+    );
 
     return NextResponse.json(gasto);
   } catch (error: unknown) {
@@ -57,7 +61,10 @@ export async function DELETE(
   try {
     await requireRole("ADMIN");
 
-    await prisma.gasto.delete({ where: { id: params.id } });
+    await withRetry(
+      () => prisma.gasto.delete({ where: { id: params.id } }),
+      { label: "gastos.delete" }
+    );
 
     return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {

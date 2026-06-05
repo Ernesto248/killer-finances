@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { pagoSchema } from "@/lib/validations";
 
 export async function PUT(
@@ -12,40 +13,52 @@ export async function PUT(
     const body = await req.json();
     const data = pagoSchema.parse(body);
 
-    const existing = await prisma.pago.findUnique({ where: { id: params.id } });
+    const existing = await withRetry(
+      () => prisma.pago.findUnique({ where: { id: params.id } }),
+      { label: "pagos.update.find" }
+    );
     if (!existing) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
 
     const [updated] = await prisma.$transaction([
-      prisma.pago.update({
-        where: { id: params.id },
-        data: {
-          personaId: data.personaId,
-          monto: data.monto,
-          moneda: data.moneda,
-          descripcion: data.descripcion ?? null,
-        },
-        include: {
-          persona: {
-            select: { id: true, nombre: true },
+      withRetry(
+        () => prisma.pago.update({
+          where: { id: params.id },
+          data: {
+            personaId: data.personaId,
+            monto: data.monto,
+            moneda: data.moneda,
+            descripcion: data.descripcion ?? null,
           },
-        },
-      }),
-      prisma.persona.update({
-        where: { id: existing.personaId },
-        data:
-          existing.moneda === "CUP"
-            ? { balanceCup: { increment: existing.monto } }
-            : { balanceUsd: { increment: existing.monto } },
-      }),
-      prisma.persona.update({
-        where: { id: data.personaId },
-        data:
-          data.moneda === "CUP"
-            ? { balanceCup: { decrement: data.monto } }
-            : { balanceUsd: { decrement: data.monto } },
-      }),
+          include: {
+            persona: {
+              select: { id: true, nombre: true },
+            },
+          },
+        }),
+        { label: "pagos.update.pago" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: existing.personaId },
+          data:
+            existing.moneda === "CUP"
+              ? { balanceCup: { increment: existing.monto } }
+              : { balanceUsd: { increment: existing.monto } },
+        }),
+        { label: "pagos.update.personaRestore" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: data.personaId },
+          data:
+            data.moneda === "CUP"
+              ? { balanceCup: { decrement: data.monto } }
+              : { balanceUsd: { decrement: data.monto } },
+        }),
+        { label: "pagos.update.personaApply" }
+      ),
     ]);
 
     return NextResponse.json(updated);
@@ -77,20 +90,29 @@ export async function DELETE(
   try {
     await requireRole("ADMIN");
 
-    const existing = await prisma.pago.findUnique({ where: { id: params.id } });
+    const existing = await withRetry(
+      () => prisma.pago.findUnique({ where: { id: params.id } }),
+      { label: "pagos.delete.find" }
+    );
     if (!existing) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
 
     await prisma.$transaction([
-      prisma.pago.delete({ where: { id: params.id } }),
-      prisma.persona.update({
-        where: { id: existing.personaId },
-        data:
-          existing.moneda === "CUP"
-            ? { balanceCup: { increment: existing.monto } }
-            : { balanceUsd: { increment: existing.monto } },
-      }),
+      withRetry(
+        () => prisma.pago.delete({ where: { id: params.id } }),
+        { label: "pagos.delete.pago" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: existing.personaId },
+          data:
+            existing.moneda === "CUP"
+              ? { balanceCup: { increment: existing.monto } }
+              : { balanceUsd: { increment: existing.monto } },
+        }),
+        { label: "pagos.delete.persona" }
+      ),
     ]);
 
     return new NextResponse(null, { status: 204 });

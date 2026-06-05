@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    let config = await prisma.configuracion.findUnique({ where: { id: "global" } });
+    let config = await withRetry(
+      () => prisma.configuracion.findUnique({ where: { id: "global" } }),
+      { label: "configuracion.find" }
+    );
     if (!config) {
-      config = await prisma.configuracion.create({
-        data: { id: "global", tasaUsdGlobal: 600 },
-      });
+      config = await withRetry(
+        () => prisma.configuracion.create({
+          data: { id: "global", tasaUsdGlobal: 600 },
+        }),
+        { label: "configuracion.create" }
+      );
     }
     return NextResponse.json({ tasaUsdGlobal: Number(config.tasaUsdGlobal) });
   } catch (error: unknown) {
@@ -37,10 +44,13 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const config = await prisma.configuracion.update({
-      where: { id: "global" },
-      data: { tasaUsdGlobal },
-    });
+    const config = await withRetry(
+      () => prisma.configuracion.update({
+        where: { id: "global" },
+        data: { tasaUsdGlobal },
+      }),
+      { label: "configuracion.update" }
+    );
 
     return NextResponse.json({ tasaUsdGlobal: Number(config.tasaUsdGlobal) });
   } catch (error: unknown) {

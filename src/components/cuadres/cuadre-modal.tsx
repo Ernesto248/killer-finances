@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ParsePreview } from "./parse-preview";
+import { filterPersonaOptions } from "@/lib/cuadres";
 import { parseWhatsAppText, type ParsedCuadre } from "@/lib/whatsapp-parser";
 import { cuadreSchema, type CuadreFormData } from "@/lib/validations";
 
@@ -45,9 +46,12 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
   const [parsed, setParsed] = useState<ParsedCuadre | null>(null);
   const [manualMode, setManualMode] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [personaSearch, setPersonaSearch] = useState("");
   const [lineas, setLineas] = useState<
     { montoUsd: number; tasa: number; modalidad: string }[]
   >([]);
+
+  const filteredPersonas = filterPersonaOptions(personas, personaSearch);
 
   useEffect(() => {
     if (!open) return;
@@ -84,6 +88,7 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
       setWhatsappText("");
       setParsed(null);
       setManualMode(false);
+      setPersonaSearch("");
       setLineas([{ montoUsd: 0, tasa: 0, modalidad: "TASA" }]);
       reset({
         personaId: "",
@@ -251,6 +256,11 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="personaId">Persona</Label>
+                <Input
+                  value={personaSearch}
+                  onChange={(e) => setPersonaSearch(e.target.value)}
+                  placeholder="Buscar por nombre o alias..."
+                />
                 <Controller
                   name="personaId"
                   control={control}
@@ -259,16 +269,21 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                       value={field.value}
                       onValueChange={field.onChange}
                     >
-                      <SelectTrigger className="w-full">
-                        <SelectValue>
-                          {field.value && personas.find(p => p.id === field.value)?.nombre || "Seleccionar persona..."}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {personas.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.nombre}
-                            {p.alias ? ` (${p.alias})` : ""}
+                       <SelectTrigger className="w-full">
+                         <SelectValue>
+                           {field.value && personas.find(p => p.id === field.value)?.nombre || "Seleccionar persona..."}
+                         </SelectValue>
+                       </SelectTrigger>
+                       <SelectContent>
+                         {filteredPersonas.length === 0 && (
+                           <div className="px-2 py-3 text-sm text-muted-foreground">
+                             No se encontraron personas
+                           </div>
+                         )}
+                         {filteredPersonas.map((p) => (
+                           <SelectItem key={p.id} value={p.id}>
+                             {p.nombre}
+                             {p.alias ? ` (${p.alias})` : ""}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -313,6 +328,11 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
             >
               <div className="space-y-2">
                 <Label htmlFor="personaIdM">Persona</Label>
+                <Input
+                  value={personaSearch}
+                  onChange={(e) => setPersonaSearch(e.target.value)}
+                  placeholder="Buscar por nombre o alias..."
+                />
                 <Controller
                   name="personaId"
                   control={control}
@@ -322,7 +342,12 @@ export function CuadreModal({ open, onOpenChange, onSaved }: CuadreModalProps) {
                         <SelectValue placeholder="Seleccionar persona..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {personas.map((p) => (
+                        {filteredPersonas.length === 0 && (
+                          <div className="px-2 py-3 text-sm text-muted-foreground">
+                            No se encontraron personas
+                          </div>
+                        )}
+                        {filteredPersonas.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             {p.nombre}
                             {p.alias ? ` (${p.alias})` : ""}

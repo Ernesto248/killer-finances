@@ -38,6 +38,8 @@ model Persona {
   reventasVendidas   ReventaWire[] @relation("ReventaVendedor")
   ventas             LoteVenta[]
 
+  @@index([createdAt])
+  @@index([tipo, activo])
   @@map("personas")
 }
 
@@ -46,6 +48,8 @@ model Cuadre {
   personaId       String   @map("persona_id")
   fecha           DateTime @default(now())
   nota            String?
+  previousBalanceCup Decimal? @map("previous_balance_cup")
+  previousBalanceUsd Decimal? @map("previous_balance_usd")
   deudaInicialCup Decimal  @default(0) @map("deuda_inicial_cup")
   pagadoCup       Decimal  @default(0) @map("pagado_cup")
   deudaFinalCup   Decimal  @default(0) @map("deuda_final_cup")

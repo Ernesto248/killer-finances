@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 
 export async function DELETE(
   req: NextRequest,
@@ -9,10 +10,13 @@ export async function DELETE(
   try {
     await requireRole("ADMIN", "EDITOR");
 
-    const abono = await prisma.abonoWire.findUnique({
-      where: { id: params.id },
-      include: { wire: true },
-    });
+    const abono = await withRetry(
+      () => prisma.abonoWire.findUnique({
+        where: { id: params.id },
+        include: { wire: true },
+      }),
+      { label: "wires.abono.revert.find" }
+    );
 
     if (!abono) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -24,18 +28,24 @@ export async function DELETE(
       nuevoPagado <= 0 ? "PENDIENTE" : nuevoPagado >= Number(abono.wire.montoCupTotal) ? "PAGADO" : "PARCIAL";
 
     await prisma.$transaction([
-      // Revert comprador balance (they owe again)
-      prisma.persona.update({
-        where: { id: abono.wire.compradorId },
-        data: { balanceCup: { increment: monto } },
-      }),
-      // Update wire
-      prisma.wire.update({
-        where: { id: abono.wire.id },
-        data: { montoPagadoCup: nuevoPagado, estado: nuevoEstado },
-      }),
-      // Delete abono
-      prisma.abonoWire.delete({ where: { id: abono.id } }),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: abono.wire.compradorId },
+          data: { balanceCup: { increment: monto } },
+        }),
+        { label: "wires.abono.revert.persona" }
+      ),
+      withRetry(
+        () => prisma.wire.update({
+          where: { id: abono.wire.id },
+          data: { montoPagadoCup: nuevoPagado, estado: nuevoEstado },
+        }),
+        { label: "wires.abono.revert.wire" }
+      ),
+      withRetry(
+        () => prisma.abonoWire.delete({ where: { id: abono.id } }),
+        { label: "wires.abono.revert.deleteAbono" }
+      ),
     ]);
 
     return NextResponse.json({ success: true });

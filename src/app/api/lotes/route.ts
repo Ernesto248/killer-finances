@@ -1,19 +1,59 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { loteSchema } from "@/lib/validations";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const lotes = await prisma.lote.findMany({
-      orderBy: { fechaCompra: "desc" },
-      include: {
-        productos: true,
-        ventas: true,
-        gastos: true,
-      },
-    });
+    const lotes = await withRetry(
+      () =>
+        prisma.lote.findMany({
+          orderBy: { fechaCompra: "desc" },
+          select: {
+            id: true,
+            nombre: true,
+            fechaCompra: true,
+            costoTotal: true,
+            monedaCosto: true,
+            createdAt: true,
+            updatedAt: true,
+            productos: {
+              select: {
+                id: true,
+                nombre: true,
+                cantidadTotal: true,
+                cantidadVendida: true,
+                costoUnitario: true,
+              },
+            },
+            ventas: {
+              select: {
+                id: true,
+                loteId: true,
+                fecha: true,
+                cantidad: true,
+                precioUnitario: true,
+                moneda: true,
+                personaId: true,
+              },
+            },
+            gastos: {
+              select: {
+                id: true,
+                fecha: true,
+                monto: true,
+                moneda: true,
+                categoria: true,
+                descripcion: true,
+                loteId: true,
+              },
+            },
+          },
+        }),
+      { label: "lotes.list" }
+    );
     return NextResponse.json(lotes);
   } catch (error: unknown) {
     const err = error as Error;
@@ -33,25 +73,28 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = loteSchema.parse(body);
 
-    const lote = await prisma.lote.create({
-      data: {
-        nombre: data.nombre,
-        costoTotal: data.costoTotal,
-        monedaCosto: data.monedaCosto,
-        productos: data.productos?.length
-          ? {
-              create: data.productos.map((p) => ({
-                nombre: p.nombre,
-                cantidadTotal: p.cantidadTotal,
-                costoUnitario: p.costoUnitario,
-              })),
-            }
-          : undefined,
-      },
-      include: {
-        productos: true,
-      },
-    });
+    const lote = await withRetry(
+      () => prisma.lote.create({
+        data: {
+          nombre: data.nombre,
+          costoTotal: data.costoTotal,
+          monedaCosto: data.monedaCosto,
+          productos: data.productos?.length
+            ? {
+                create: data.productos.map((p) => ({
+                  nombre: p.nombre,
+                  cantidadTotal: p.cantidadTotal,
+                  costoUnitario: p.costoUnitario,
+                })),
+              }
+            : undefined,
+        },
+        include: {
+          productos: true,
+        },
+      }),
+      { label: "lotes.create" }
+    );
 
     return NextResponse.json(lote, { status: 201 });
   } catch (error: unknown) {

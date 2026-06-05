@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { abonoWireSchema } from "@/lib/validations";
 
 export async function POST(
@@ -12,10 +13,13 @@ export async function POST(
     const body = await req.json();
     const data = abonoWireSchema.parse(body);
 
-    const wire = await prisma.wire.findUnique({
-      where: { id: params.id },
-      include: { abonos: true },
-    });
+    const wire = await withRetry(
+      () => prisma.wire.findUnique({
+        where: { id: params.id },
+        include: { abonos: true },
+      }),
+      { label: "wires.abonos.find" }
+    );
     if (!wire) {
       return NextResponse.json({ error: "Wire no encontrado" }, { status: 404 });
     }
@@ -31,24 +35,33 @@ export async function POST(
     }
 
     const [abono] = await prisma.$transaction([
-      prisma.abonoWire.create({
-        data: {
-          wireId: params.id,
-          monto: data.monto,
-          moneda: data.moneda,
-        },
-      }),
-      prisma.wire.update({
-        where: { id: params.id },
-        data: {
-          montoPagadoCup: newPagado,
-          estado,
-        },
-      }),
-      prisma.persona.update({
-        where: { id: wire.compradorId },
-        data: { balanceCup: { decrement: data.monto } },
-      }),
+      withRetry(
+        () => prisma.abonoWire.create({
+          data: {
+            wireId: params.id,
+            monto: data.monto,
+            moneda: data.moneda,
+          },
+        }),
+        { label: "wires.abonos.create" }
+      ),
+      withRetry(
+        () => prisma.wire.update({
+          where: { id: params.id },
+          data: {
+            montoPagadoCup: newPagado,
+            estado,
+          },
+        }),
+        { label: "wires.abonos.updateWire" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: wire.compradorId },
+          data: { balanceCup: { decrement: data.monto } },
+        }),
+        { label: "wires.abonos.updatePersona" }
+      ),
     ]);
 
     return NextResponse.json(abono, { status: 201 });

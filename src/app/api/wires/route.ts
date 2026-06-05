@@ -1,21 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { wireSchema } from "@/lib/validations";
 import { Prisma } from "@/generated/prisma/client";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const wires = await prisma.wire.findMany({
-      orderBy: { fecha: "desc" },
-      include: {
-        comprador: {
-          select: { id: true, nombre: true },
-        },
-        abonos: true,
-      },
-    });
+    const wires = await withRetry(
+      () =>
+        prisma.wire.findMany({
+          orderBy: { fecha: "desc" },
+          select: {
+            id: true,
+            compradorId: true,
+            fecha: true,
+            montoUsd: true,
+            tasaPactada: true,
+            montoCupTotal: true,
+            montoPagadoCup: true,
+            monedaPago: true,
+            porcentajeComision: true,
+            gananciaCup: true,
+            estado: true,
+            createdAt: true,
+            updatedAt: true,
+            comprador: { select: { id: true, nombre: true } },
+            abonos: { select: { id: true, fecha: true, monto: true, moneda: true } },
+          },
+        }),
+      { label: "wires.list" }
+    );
     return NextResponse.json(wires);
   } catch (error: unknown) {
     const err = error as Error;
@@ -35,10 +51,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = wireSchema.parse(body);
 
-    const cuadres = await prisma.cuadre.findMany({
-      select: { tasaPromedioCup: true },
-      where: { tasaPromedioCup: { gt: 0 } },
-    });
+    const cuadres = await withRetry(
+      () => prisma.cuadre.findMany({
+        select: { tasaPromedioCup: true },
+        where: { tasaPromedioCup: { gt: 0 } },
+      }),
+      { label: "wires.create.cuadres" }
+    );
     const tasaPromedio = cuadres.length > 0
       ? cuadres.reduce((s, c) => s + Number(c.tasaPromedioCup), 0) / cuadres.length
       : 0;
@@ -47,27 +66,33 @@ export async function POST(req: NextRequest) {
     const gananciaCup = Math.round(data.montoUsd * (data.tasaPactada - tasaPromedio));
 
     const [wire] = await prisma.$transaction([
-      prisma.wire.create({
-        data: {
-          compradorId: data.compradorId,
-          montoUsd: data.montoUsd,
-          tasaPactada: data.tasaPactada,
-          montoCupTotal,
-          gananciaCup,
-          monedaPago: data.monedaPago,
-          porcentajeComision: data.porcentajeComision ?? null,
-        },
-        include: {
-          comprador: {
-            select: { id: true, nombre: true },
+      withRetry(
+        () => prisma.wire.create({
+          data: {
+            compradorId: data.compradorId,
+            montoUsd: data.montoUsd,
+            tasaPactada: data.tasaPactada,
+            montoCupTotal,
+            gananciaCup,
+            monedaPago: data.monedaPago,
+            porcentajeComision: data.porcentajeComision ?? null,
           },
-          abonos: true,
-        },
-      }),
-      prisma.persona.update({
-        where: { id: data.compradorId },
-        data: { balanceCup: { increment: montoCupTotal } },
-      }),
+          include: {
+            comprador: {
+              select: { id: true, nombre: true },
+            },
+            abonos: true,
+          },
+        }),
+        { label: "wires.create.wire" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: data.compradorId },
+          data: { balanceCup: { increment: montoCupTotal } },
+        }),
+        { label: "wires.create.persona" }
+      ),
     ]);
 
     return NextResponse.json(wire, { status: 201 });

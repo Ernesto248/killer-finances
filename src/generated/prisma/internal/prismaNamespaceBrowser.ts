@@ -117,6 +117,8 @@ export const CuadreScalarFieldEnum = {
   personaId: 'personaId',
   fecha: 'fecha',
   nota: 'nota',
+  previousBalanceCup: 'previousBalanceCup',
+  previousBalanceUsd: 'previousBalanceUsd',
   deudaInicialCup: 'deudaInicialCup',
   pagadoCup: 'pagadoCup',
   deudaFinalCup: 'deudaFinalCup',

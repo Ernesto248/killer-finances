@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { wireSchema } from "@/lib/validations";
 
 export async function GET(
@@ -43,17 +44,23 @@ export async function PUT(
     const body = await req.json();
     const data = wireSchema.parse(body);
 
-    const existing = await prisma.wire.findUnique({
-      where: { id: params.id },
-    });
+    const existing = await withRetry(
+      () => prisma.wire.findUnique({
+        where: { id: params.id },
+      }),
+      { label: "wires.update.find" }
+    );
     if (!existing) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
 
-    const cuadres = await prisma.cuadre.findMany({
-      select: { tasaPromedioCup: true },
-      where: { tasaPromedioCup: { gt: 0 } },
-    });
+    const cuadres = await withRetry(
+      () => prisma.cuadre.findMany({
+        select: { tasaPromedioCup: true },
+        where: { tasaPromedioCup: { gt: 0 } },
+      }),
+      { label: "wires.update.cuadres" }
+    );
     const tasaPromedio = cuadres.length > 0
       ? cuadres.reduce((s, c) => s + Number(c.tasaPromedioCup), 0) / cuadres.length
       : 0;
@@ -64,32 +71,41 @@ export async function PUT(
     const previousMontoCupTotal = Number(existing.montoCupTotal);
 
     const [wire] = await prisma.$transaction([
-      prisma.wire.update({
-        where: { id: params.id },
-        data: {
-          compradorId: data.compradorId,
-          montoUsd: data.montoUsd,
-          tasaPactada: data.tasaPactada,
-          montoCupTotal,
-          gananciaCup,
-          monedaPago: data.monedaPago,
-          porcentajeComision: data.porcentajeComision ?? null,
-        },
-        include: {
-          comprador: {
-            select: { id: true, nombre: true },
+      withRetry(
+        () => prisma.wire.update({
+          where: { id: params.id },
+          data: {
+            compradorId: data.compradorId,
+            montoUsd: data.montoUsd,
+            tasaPactada: data.tasaPactada,
+            montoCupTotal,
+            gananciaCup,
+            monedaPago: data.monedaPago,
+            porcentajeComision: data.porcentajeComision ?? null,
           },
-          abonos: true,
-        },
-      }),
-      prisma.persona.update({
-        where: { id: existing.compradorId },
-        data: { balanceCup: { decrement: previousMontoCupTotal } },
-      }),
-      prisma.persona.update({
-        where: { id: data.compradorId },
-        data: { balanceCup: { increment: montoCupTotal } },
-      }),
+          include: {
+            comprador: {
+              select: { id: true, nombre: true },
+            },
+            abonos: true,
+          },
+        }),
+        { label: "wires.update.wire" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: existing.compradorId },
+          data: { balanceCup: { decrement: previousMontoCupTotal } },
+        }),
+        { label: "wires.update.personaDecrease" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: data.compradorId },
+          data: { balanceCup: { increment: montoCupTotal } },
+        }),
+        { label: "wires.update.personaIncrease" }
+      ),
     ]);
 
     return NextResponse.json(wire);

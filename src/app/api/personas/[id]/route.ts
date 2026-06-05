@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
+import { safeFindPersonaById } from "@/lib/personas-helpers";
 import { personaSchema } from "@/lib/validations";
 
 export async function GET(
@@ -9,14 +11,7 @@ export async function GET(
 ) {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const persona = await prisma.persona.findUnique({
-      where: { id: params.id },
-      include: {
-        cuadres: { orderBy: { fecha: "desc" }, take: 20 },
-        pagos: { orderBy: { fecha: "desc" }, take: 20 },
-        wiresComprados: { orderBy: { fecha: "desc" }, take: 10 },
-      },
-    });
+    const persona = await safeFindPersonaById(params.id);
     if (!persona) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
@@ -42,18 +37,21 @@ export async function PUT(
     const body = await req.json();
     const data = personaSchema.parse(body);
 
-    const persona = await prisma.persona.update({
-      where: { id: params.id },
-      data: {
-        nombre: data.nombre,
-        telefono: data.telefono ?? null,
-        alias: data.alias ?? null,
-        tipo: data.tipo,
-        activo: data.activo,
-        balanceUsd: data.balanceUsd ?? 0,
-        balanceCup: data.balanceCup ?? 0,
-      },
-    });
+    const persona = await withRetry(
+      () => prisma.persona.update({
+        where: { id: params.id },
+        data: {
+          nombre: data.nombre,
+          telefono: data.telefono ?? null,
+          alias: data.alias ?? null,
+          tipo: data.tipo,
+          activo: data.activo,
+          balanceUsd: data.balanceUsd ?? 0,
+          balanceCup: data.balanceCup ?? 0,
+        },
+      }),
+      { label: "personas.update" }
+    );
 
     return NextResponse.json(persona);
   } catch (error: unknown) {
@@ -83,7 +81,10 @@ export async function DELETE(
 ) {
   try {
     await requireRole("ADMIN");
-    await prisma.persona.delete({ where: { id: params.id } });
+    await withRetry(
+      () => prisma.persona.delete({ where: { id: params.id } }),
+      { label: "personas.delete" }
+    );
     return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {
     const err = error as Error & { code?: string };

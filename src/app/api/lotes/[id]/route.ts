@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { loteSchema } from "@/lib/validations";
 
 export async function GET(
@@ -9,20 +10,23 @@ export async function GET(
 ) {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const lote = await prisma.lote.findUnique({
-      where: { id: params.id },
-      include: {
-        productos: true,
-        ventas: {
-          include: {
-            persona: {
-              select: { id: true, nombre: true },
+    const lote = await withRetry(
+      () => prisma.lote.findUnique({
+        where: { id: params.id },
+        include: {
+          productos: true,
+          ventas: {
+            include: {
+              persona: {
+                select: { id: true, nombre: true },
+              },
             },
           },
+          gastos: true,
         },
-        gastos: true,
-      },
-    });
+      }),
+      { label: "lotes.detail" }
+    );
     if (!lote) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     }
@@ -49,27 +53,33 @@ export async function PUT(
     const data = loteSchema.parse(body);
 
     const [, lote] = await prisma.$transaction([
-      prisma.loteProducto.deleteMany({ where: { loteId: params.id } }),
-      prisma.lote.update({
-        where: { id: params.id },
-        data: {
-          nombre: data.nombre,
-          costoTotal: data.costoTotal,
-          monedaCosto: data.monedaCosto,
-          productos: data.productos?.length
-            ? {
-                create: data.productos.map((p) => ({
-                  nombre: p.nombre,
-                  cantidadTotal: p.cantidadTotal,
-                  costoUnitario: p.costoUnitario,
-                })),
-              }
-            : undefined,
-        },
-        include: {
-          productos: true,
-        },
-      }),
+      withRetry(
+        () => prisma.loteProducto.deleteMany({ where: { loteId: params.id } }),
+        { label: "lotes.update.deleteProductos" }
+      ),
+      withRetry(
+        () => prisma.lote.update({
+          where: { id: params.id },
+          data: {
+            nombre: data.nombre,
+            costoTotal: data.costoTotal,
+            monedaCosto: data.monedaCosto,
+            productos: data.productos?.length
+              ? {
+                  create: data.productos.map((p) => ({
+                    nombre: p.nombre,
+                    cantidadTotal: p.cantidadTotal,
+                    costoUnitario: p.costoUnitario,
+                  })),
+                }
+              : undefined,
+          },
+          include: {
+            productos: true,
+          },
+        }),
+        { label: "lotes.update.lote" }
+      ),
     ]);
 
     return NextResponse.json(lote);
@@ -101,7 +111,10 @@ export async function DELETE(
   try {
     await requireRole("ADMIN");
 
-    await prisma.lote.delete({ where: { id: params.id } });
+    await withRetry(
+      () => prisma.lote.delete({ where: { id: params.id } }),
+      { label: "lotes.delete" }
+    );
 
     return new NextResponse(null, { status: 204 });
   } catch (error: unknown) {

@@ -1,20 +1,36 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
 
-    const wires = await prisma.wire.findMany({
-      where: { estado: { not: "PAGADO" } },
-      orderBy: { fecha: "desc" },
-      include: {
-        comprador: {
-          select: { id: true, nombre: true },
-        },
-      },
-    });
+    const wires = await withRetry(
+      () =>
+        prisma.wire.findMany({
+          where: { estado: { not: "PAGADO" } },
+          orderBy: { fecha: "desc" },
+          select: {
+            id: true,
+            compradorId: true,
+            fecha: true,
+            montoUsd: true,
+            tasaPactada: true,
+            montoCupTotal: true,
+            montoPagadoCup: true,
+            monedaPago: true,
+            porcentajeComision: true,
+            gananciaCup: true,
+            estado: true,
+            createdAt: true,
+            updatedAt: true,
+            comprador: { select: { id: true, nombre: true } },
+          },
+        }),
+      { label: "wiresPendientes.list" }
+    );
 
     const result = wires.map((w) => ({
       ...w,

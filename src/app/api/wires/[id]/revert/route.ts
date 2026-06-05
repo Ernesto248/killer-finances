@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 
 export async function DELETE(
   req: NextRequest,
@@ -9,10 +10,13 @@ export async function DELETE(
   try {
     await requireRole("ADMIN", "EDITOR");
 
-    const wire = await prisma.wire.findUnique({
-      where: { id: params.id },
-      include: { abonos: true },
-    });
+    const wire = await withRetry(
+      () => prisma.wire.findUnique({
+        where: { id: params.id },
+        include: { abonos: true },
+      }),
+      { label: "wires.revert.find" }
+    );
 
     if (!wire) {
       return NextResponse.json({ error: "No encontrado" }, { status: 404 });
@@ -21,15 +25,21 @@ export async function DELETE(
     const totalAbonos = wire.abonos.reduce((s, a) => s + Number(a.monto), 0);
 
     await prisma.$transaction([
-      // Revert comprador balance (they no longer owe CUP)
-      prisma.persona.update({
-        where: { id: wire.compradorId },
-        data: { balanceCup: { decrement: Number(wire.montoCupTotal) - totalAbonos } },
-      }),
-      // Delete all abonos
-      prisma.abonoWire.deleteMany({ where: { wireId: wire.id } }),
-      // Delete the wire
-      prisma.wire.delete({ where: { id: wire.id } }),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: wire.compradorId },
+          data: { balanceCup: { decrement: Number(wire.montoCupTotal) - totalAbonos } },
+        }),
+        { label: "wires.revert.persona" }
+      ),
+      withRetry(
+        () => prisma.abonoWire.deleteMany({ where: { wireId: wire.id } }),
+        { label: "wires.revert.deleteAbonos" }
+      ),
+      withRetry(
+        () => prisma.wire.delete({ where: { id: wire.id } }),
+        { label: "wires.revert.deleteWire" }
+      ),
     ]);
 
     return NextResponse.json({ success: true });

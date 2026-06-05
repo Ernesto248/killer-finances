@@ -1,20 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { withRetry } from "@/lib/db-retry";
 import { pagoSchema } from "@/lib/validations";
 import { Prisma } from "@/generated/prisma/client";
 
 export async function GET() {
   try {
     await requireRole("ADMIN", "EDITOR", "VISOR");
-    const pagos = await prisma.pago.findMany({
-      orderBy: { fecha: "desc" },
-      include: {
-        persona: {
-          select: { id: true, nombre: true },
-        },
-      },
-    });
+    const pagos = await withRetry(
+      () =>
+        prisma.pago.findMany({
+          orderBy: { fecha: "desc" },
+          select: {
+            id: true,
+            personaId: true,
+            fecha: true,
+            monto: true,
+            moneda: true,
+            descripcion: true,
+            createdAt: true,
+            persona: { select: { id: true, nombre: true } },
+          },
+        }),
+      { label: "pagos.list" }
+    );
     return NextResponse.json(pagos);
   } catch (error: unknown) {
     const err = error as Error;
@@ -35,26 +45,32 @@ export async function POST(req: NextRequest) {
     const data = pagoSchema.parse(body);
 
     const [pago] = await prisma.$transaction([
-      prisma.pago.create({
-        data: {
-          personaId: data.personaId,
-          monto: data.monto,
-          moneda: data.moneda,
-          descripcion: data.descripcion ?? null,
-        },
-        include: {
-          persona: {
-            select: { id: true, nombre: true },
+      withRetry(
+        () => prisma.pago.create({
+          data: {
+            personaId: data.personaId,
+            monto: data.monto,
+            moneda: data.moneda,
+            descripcion: data.descripcion ?? null,
           },
-        },
-      }),
-      prisma.persona.update({
-        where: { id: data.personaId },
-        data:
-          data.moneda === "CUP"
-            ? { balanceCup: { decrement: data.monto } }
-            : { balanceUsd: { decrement: data.monto } },
-      }),
+          include: {
+            persona: {
+              select: { id: true, nombre: true },
+            },
+          },
+        }),
+        { label: "pagos.create" }
+      ),
+      withRetry(
+        () => prisma.persona.update({
+          where: { id: data.personaId },
+          data:
+            data.moneda === "CUP"
+              ? { balanceCup: { decrement: data.monto } }
+              : { balanceUsd: { decrement: data.monto } },
+        }),
+        { label: "pagos.create.persona" }
+      ),
     ]);
 
     return NextResponse.json(pago, { status: 201 });
